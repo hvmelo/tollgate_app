@@ -183,8 +183,8 @@ class ConnectionCard extends StatelessWidget {
             TextButton(
               onPressed: () => context.push(Routes.scan),
               child: Text(
-                'Show ${tollGateNetworks.length - homeScreenMaxNetworksToShow} More',
-                style: theme.textTheme.labelLarge?.copyWith(
+                '+${tollGateNetworks.length - homeScreenMaxNetworksToShow} TollGate Networks',
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: colorScheme.primary,
                 ),
               ),

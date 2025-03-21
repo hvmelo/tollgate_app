@@ -34,6 +34,7 @@ class HomeScreen extends HookConsumerWidget {
     ]);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -61,11 +62,11 @@ class HomeScreen extends HookConsumerWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60),
+      padding: const EdgeInsets.symmetric(vertical: 70),
       child: Column(
         children: [
           SizedBox(
-            height: 80,
+            height: 60,
             child: Center(
               child: SvgPicture.asset(
                 isDarkMode
