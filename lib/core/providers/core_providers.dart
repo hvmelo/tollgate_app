@@ -7,19 +7,35 @@ import '../../config/app_config.dart';
 
 part 'core_providers.g.dart';
 
+/// Theme mode provider for app-wide theme control
 @Riverpod(keepAlive: true)
 class ThemeNotifier extends _$ThemeNotifier {
+  static const _themePreferenceKey = 'theme_mode';
+
   @override
   ThemeMode build() {
+    _loadThemePreference();
     return ThemeMode.system;
   }
 
-  void toggleTheme() {
-    state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  Future<void> _loadThemePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = prefs.getString(_themePreferenceKey);
+
+    if (themeString != null) {
+      final themeMode = ThemeMode.values.firstWhere(
+        (mode) => mode.toString() == themeString,
+        orElse: () => ThemeMode.system,
+      );
+      state = themeMode;
+    }
   }
 
-  void setThemeMode(ThemeMode mode) {
+  Future<void> setThemeMode(ThemeMode mode) async {
     state = mode;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themePreferenceKey, mode.toString());
   }
 }
 

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tollgate_app/ui/settings/settings_screen.dart';
 
+import '../../connection_details/connection_screen.dart';
 import '../../home/home_screen.dart';
+import '../../network_scan/scan_screen.dart';
 import '../../wallet/wallet_screen.dart';
 import '../navigation/navigation_shell.dart';
+import 'routes.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final homeNavigatorKey = GlobalKey<NavigatorState>();
@@ -29,7 +32,7 @@ GoRouter router() => GoRouter(
               navigatorKey: homeNavigatorKey,
               routes: [
                 GoRoute(
-                  path: '/',
+                  path: Routes.home,
                   pageBuilder: (context, state) => CustomTransitionPage(
                     child: const HomeScreen(),
                     transitionsBuilder:
@@ -38,9 +41,18 @@ GoRouter router() => GoRouter(
                   ),
                   routes: [
                     GoRoute(
-                      path: 'wallet',
+                      path: 'connection',
                       pageBuilder: (context, state) => CustomTransitionPage(
-                        child: const WalletScreen(),
+                        child: const ConnectionScreen(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) =>
+                                _buildSlideLeftTransition(animation, child),
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'scan',
+                      pageBuilder: (context, state) => CustomTransitionPage(
+                        child: const ScanScreen(),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) =>
                                 _buildSlideLeftTransition(animation, child),
@@ -51,10 +63,24 @@ GoRouter router() => GoRouter(
               ],
             ),
             StatefulShellBranch(
+              navigatorKey: walletNavigatorKey,
+              routes: [
+                GoRoute(
+                  path: Routes.wallet,
+                  pageBuilder: (context, state) => CustomTransitionPage(
+                    child: const WalletScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) =>
+                            _buildFadeInTransition(animation, child),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
               navigatorKey: settingsNavigatorKey,
               routes: [
                 GoRoute(
-                  path: '/settings',
+                  path: Routes.settings,
                   pageBuilder: (context, state) => CustomTransitionPage(
                     child: const SettingsScreen(),
                     transitionsBuilder:
