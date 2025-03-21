@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../models/cashu_token.dart';
-import '../services/cashu_service.dart';
+import 'cashu_token.dart';
+import '../../data/services/cashu_service.dart';
 
 /// A mock implementation of a Cashu wallet
 class CashuWallet {

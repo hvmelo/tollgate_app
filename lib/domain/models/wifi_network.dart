@@ -8,8 +8,7 @@ class WiFiNetwork {
   final int frequency;
   final String securityType;
   final bool isTollGate;
-  final double? pricePerMb;
-  final String? priceUnit;
+  final int? satsPerMin;
 
   WiFiNetwork({
     required this.ssid,
@@ -18,8 +17,7 @@ class WiFiNetwork {
     required this.frequency,
     required this.securityType,
     this.isTollGate = false,
-    this.pricePerMb,
-    this.priceUnit,
+    this.satsPerMin,
   });
 
   factory WiFiNetwork.fromJson(Map<String, dynamic> json) {
@@ -30,11 +28,9 @@ class WiFiNetwork {
       frequency: json['frequency'] as int,
       securityType: json['securityType'] as String,
       isTollGate: json['isTollGate'] as bool? ?? false,
-      pricePerMb:
-          json['pricePerMb'] != null
-              ? (json['pricePerMb'] as num).toDouble()
-              : null,
-      priceUnit: json['priceUnit'] as String?,
+      satsPerMin: json['satsPerMin'] != null
+          ? (json['satsPerMin'] as num).toInt()
+          : null,
     );
   }
 
@@ -46,8 +42,7 @@ class WiFiNetwork {
       'frequency': frequency,
       'securityType': securityType,
       'isTollGate': isTollGate,
-      'pricePerMb': pricePerMb,
-      'priceUnit': priceUnit,
+      'satsPerMin': satsPerMin,
     };
   }
 
@@ -55,7 +50,7 @@ class WiFiNetwork {
   factory WiFiNetwork.fromScanResult(
     dynamic scanResult, {
     bool isTollGate = false,
-    double? price,
+    int? price,
     String? unit,
   }) {
     // Platform-specific handling of scan results
@@ -68,8 +63,7 @@ class WiFiNetwork {
         frequency: scanResult.frequency ?? 0,
         securityType: _getSecurityType(scanResult),
         isTollGate: isTollGate,
-        pricePerMb: price,
-        priceUnit: unit,
+        satsPerMin: price,
       );
     } else {
       // iOS or unsupported platform
@@ -80,8 +74,7 @@ class WiFiNetwork {
         frequency: 0, // Default value for iOS
         securityType: 'Unknown',
         isTollGate: isTollGate,
-        pricePerMb: price,
-        priceUnit: unit,
+        satsPerMin: price,
       );
     }
   }
@@ -118,13 +111,12 @@ class WiFiNetwork {
       frequency: frequency ?? this.frequency,
       securityType: securityType ?? this.securityType,
       isTollGate: isTollGate ?? this.isTollGate,
-      pricePerMb: pricePerMb ?? this.pricePerMb,
-      priceUnit: priceUnit ?? this.priceUnit,
+      satsPerMin: satsPerMin,
     );
   }
 
   @override
   String toString() {
-    return 'WiFiNetwork(ssid: $ssid, isTollGate: $isTollGate, price: ${pricePerMb ?? "N/A"} ${priceUnit ?? ""})';
+    return 'WiFiNetwork(ssid: $ssid, isTollGate: $isTollGate, price: ${satsPerMin ?? "N/A"} sats/min)';
   }
 }

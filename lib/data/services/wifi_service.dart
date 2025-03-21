@@ -31,12 +31,12 @@ class WifiService {
         WiFiNetwork(
           ssid: 'TollGate_${i + 1}',
           bssid: '00:11:22:33:44:${55 + i}',
-          signalStrength: -50 - (_random.nextInt(20)),
+          signalStrength:
+              -(_random.nextInt(31)), // Random number between -30 and 0
           frequency: 2400 + _random.nextInt(100),
-          securityType: 'WPA2',
+          securityType: 'Open',
           isTollGate: true,
-          pricePerMb: 1.0 + _random.nextDouble(),
-          priceUnit: 'sats',
+          satsPerMin: 5 + _random.nextInt(26),
         ),
       );
     }
@@ -47,7 +47,8 @@ class WifiService {
         WiFiNetwork(
           ssid: 'WiFi_${i + 1}',
           bssid: '11:22:33:44:55:${i + 1}',
-          signalStrength: -60 - (_random.nextInt(30)),
+          signalStrength:
+              -(_random.nextInt(66) + 30), // Random number between -30 and -95
           frequency: 2400 + _random.nextInt(100),
           securityType: _random.nextBool() ? 'WPA2' : 'WPA3',
           isTollGate: false,
@@ -85,9 +86,8 @@ class WifiService {
 
     return TollGateResponse(
       providerName: 'TollGate Provider',
-      pricePerMb: 1.0 + _random.nextDouble(),
-      priceUnit: 'sats',
-      initialCost: 100 + _random.nextInt(100),
+      satsPerMin: 5 + _random.nextInt(25),
+      initialCost: 1 + _random.nextInt(10),
       description: 'Pay-as-you-go Wi-Fi access',
       mintUrl: 'https://mint.tollgate.network',
       paymentUrl: 'https://pay.tollgate.network',

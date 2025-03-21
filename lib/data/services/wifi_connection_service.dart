@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:wifi_iot/wifi_iot.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
-import '../models/connection_state.dart';
-import '../models/wifi_network.dart';
+import '../../domain/models/connection_state.dart';
+import '../../domain/models/wifi_network.dart';
 
 /// Service for connecting to Wi-Fi networks and verifying TollGate status
 class WiFiConnectionService {
@@ -125,9 +125,7 @@ class WiFiConnectionService {
       final url = 'http://${state.routerIp}:2121/status';
 
       // Set a short timeout for verification
-      final response = await http
-          .get(Uri.parse(url))
-          .timeout(
+      final response = await http.get(Uri.parse(url)).timeout(
             const Duration(seconds: 5),
             onTimeout: () => http.Response('{"error": "Timeout"}', 408),
           );

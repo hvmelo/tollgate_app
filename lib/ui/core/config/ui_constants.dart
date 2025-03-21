@@ -1,0 +1,1 @@
+const homeScreenMaxNetworksToShow = 2;

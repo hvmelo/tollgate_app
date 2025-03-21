@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tollgate_app/config/app_config.dart';
 
 import 'core/providers/core_providers.dart';
+import 'main.dart';
 import 'utils/provider_logger.dart';
 
 /// Development config entry point.

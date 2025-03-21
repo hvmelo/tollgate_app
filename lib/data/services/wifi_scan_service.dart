@@ -102,14 +102,14 @@ class WiFiScanService {
 
     // For this implementation, we'll use a simplified approach:
     // Check if the SSID contains "TollGate" or has a specific pattern
-    final ssid = ap.ssid ?? '';
+    final ssid = ap.ssid;
     return ssid.toLowerCase().contains('tollgate') ||
         ssid.toLowerCase().contains('toll_gate') ||
         ssid.toLowerCase().contains('toll-gate');
   }
 
   /// Extract price information from beacon data
-  double? _extractPrice(WiFiAccessPoint ap) {
+  int? _extractPrice(WiFiAccessPoint ap) {
     // In a real implementation, this would parse the vendor-specific IE
     // to extract the price value embedded in the beacon frame
 
@@ -122,12 +122,12 @@ class WiFiScanService {
     if (parts.length > 1) {
       final lastPart = parts.last.replaceAll(RegExp(r'[^0-9.]'), '');
       if (lastPart.isNotEmpty) {
-        return double.tryParse(lastPart);
+        return int.tryParse(lastPart);
       }
     }
 
     // Default price if we can't extract it
-    return 5.0;
+    return 5;
   }
 
   /// Extract price unit from beacon data

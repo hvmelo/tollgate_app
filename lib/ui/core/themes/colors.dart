@@ -23,7 +23,7 @@ abstract final class AppColors {
   // Theme backgrounds
   static const darkBackground = Color(0xFF1E2131); // TollGate dark background
   static const darkCardBackground =
-      Color(0xFFE7EAED); // Light gray background for cards in dark mode
+      Color(0xFF2A2D40); // Dark background for cards in dark mode
   static const disabledButtonBackground =
       Color(0xFFD5D5D5); // Disabled button background
   static const darkSurface =

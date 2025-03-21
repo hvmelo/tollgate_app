@@ -1,8 +1,7 @@
 /// Represents a response from a TollGate network after connecting
 class TollGateResponse {
   final String? providerName;
-  final double? pricePerMb;
-  final String? priceUnit;
+  final int? satsPerMin;
   final int? initialCost;
   final String? description;
   final String? mintUrl;
@@ -12,8 +11,7 @@ class TollGateResponse {
 
   TollGateResponse({
     this.providerName,
-    this.pricePerMb,
-    this.priceUnit,
+    this.satsPerMin,
     this.initialCost,
     this.description,
     this.mintUrl,
@@ -25,11 +23,9 @@ class TollGateResponse {
   factory TollGateResponse.fromJson(Map<String, dynamic> json) {
     return TollGateResponse(
       providerName: json['provider_name'] as String?,
-      pricePerMb:
-          json['price_per_mb'] != null
-              ? (json['price_per_mb'] as num).toDouble()
-              : null,
-      priceUnit: json['price_unit'] as String?,
+      satsPerMin: json['sats_per_min'] != null
+          ? (json['sats_per_min'] as num).toInt()
+          : null,
       initialCost: json['initial_cost'] as int?,
       description: json['description'] as String?,
       mintUrl: json['mint_url'] as String?,
@@ -42,8 +38,7 @@ class TollGateResponse {
   Map<String, dynamic> toJson() {
     return {
       'provider_name': providerName,
-      'price_per_mb': pricePerMb,
-      'price_unit': priceUnit,
+      'sats_per_min': satsPerMin,
       'initial_cost': initialCost,
       'description': description,
       'mint_url': mintUrl,

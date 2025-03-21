@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/models/cashu_token.dart';
+import '../../domain/models/cashu_token.dart';
 import '../../core/providers/wallet_provider.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
@@ -39,26 +39,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         ],
       ),
       body: _buildBody(walletState),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1, // Wallet tab
-        onTap: (index) {
-          if (index == 0) {
-            context.go('/'); // Home
-          } else if (index == 1) {
-            // Already on wallet
-          } else if (index == 2) {
-            context.go('/scan'); // Networks
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.wifi), label: 'Networks'),
-        ],
-      ),
     );
   }
 
@@ -283,15 +263,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                               setState(() {
                                 _isImporting = true;
                               });
-                              _importToken()
-                                  .then((_) {
-                                    Navigator.of(context).pop();
-                                  })
-                                  .catchError((_) {
-                                    setState(() {
-                                      _isImporting = false;
-                                    });
-                                  });
+                              _importToken().then((_) {
+                                Navigator.of(context).pop();
+                              }).catchError((_) {
+                                setState(() {
+                                  _isImporting = false;
+                                });
+                              });
                             },
                             child: const Text('Import'),
                           ),
@@ -330,150 +308,149 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Send Sats'),
-              content:
-                  token == null
-                      ? SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              'How many sats do you want to send?',
-                              style: TextStyle(fontSize: 14),
+              content: token == null
+                  ? SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'How many sats do you want to send?',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: amountController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Amount (sats)',
+                              hintText: '100',
                             ),
-                            const SizedBox(height: 16),
-                            TextField(
-                              controller: amountController,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Amount (sats)',
-                                hintText: '100',
-                              ),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            if (isCreating)
-                              const Center(child: CircularProgressIndicator())
-                            else
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      if (amountController.text.isEmpty) return;
-                                      final amount = int.parse(
-                                        amountController.text,
-                                      );
-                                      if (amount <= 0 ||
-                                          amount > walletState.balance) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Invalid amount. Please try again.',
-                                            ),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                        return;
-                                      }
-
-                                      setState(() {
-                                        isCreating = true;
-                                      });
-
-                                      try {
-                                        final generatedToken = await ref
-                                            .read(walletProvider.notifier)
-                                            .createToken(amount);
-                                        setState(() {
-                                          token = generatedToken;
-                                          isCreating = false;
-                                        });
-                                      } catch (e) {
-                                        setState(() {
-                                          isCreating = false;
-                                        });
-                                        Navigator.of(context).pop();
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Error: $e'),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: const Text('Create Token'),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      )
-                      : SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Token Created!'),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: SelectableText(
-                                token!.encodedToken,
-                                style: const TextStyle(fontFamily: 'monospace'),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (isCreating)
+                            const Center(child: CircularProgressIndicator())
+                          else
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                OutlinedButton.icon(
+                                TextButton(
                                   onPressed: () {
-                                    Clipboard.setData(
-                                      ClipboardData(text: token!.encodedToken),
-                                    ).then((_) {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    if (amountController.text.isEmpty) return;
+                                    final amount = int.parse(
+                                      amountController.text,
+                                    );
+                                    if (amount <= 0 ||
+                                        amount > walletState.balance) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                            'Token copied to clipboard',
+                                            'Invalid amount. Please try again.',
                                           ),
+                                          backgroundColor: Colors.red,
                                         ),
                                       );
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isCreating = true;
                                     });
+
+                                    try {
+                                      final generatedToken = await ref
+                                          .read(walletProvider.notifier)
+                                          .createToken(amount);
+                                      setState(() {
+                                        token = generatedToken;
+                                        isCreating = false;
+                                      });
+                                    } catch (e) {
+                                      setState(() {
+                                        isCreating = false;
+                                      });
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
-                                  icon: const Icon(Icons.copy),
-                                  label: const Text('Copy'),
-                                ),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: const Icon(Icons.check),
-                                  label: const Text('Done'),
+                                  child: const Text('Create Token'),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                        ],
                       ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Token Created!'),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: SelectableText(
+                              token!.encodedToken,
+                              style: const TextStyle(fontFamily: 'monospace'),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: token!.encodedToken),
+                                  ).then((_) {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Token copied to clipboard',
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                },
+                                icon: const Icon(Icons.copy),
+                                label: const Text('Copy'),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                icon: const Icon(Icons.check),
+                                label: const Text('Done'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
             );
           },
         );

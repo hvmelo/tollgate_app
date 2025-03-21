@@ -7,9 +7,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
-import '../models/cashu_token.dart';
-import '../models/cashu_wallet.dart';
-import '../services/cashu_service.dart';
+import '../../domain/models/cashu_token.dart';
+import '../../domain/models/cashu_wallet.dart';
+import 'cashu_service.dart';
 
 /// Service for managing Cashu wallet operations
 class CashuWalletService {
