@@ -38,7 +38,7 @@ GoRouter router() => GoRouter(
                   ),
                   routes: [
                     GoRoute(
-                      path: '/wallet',
+                      path: 'wallet',
                       pageBuilder: (context, state) => CustomTransitionPage(
                         child: const WalletScreen(),
                         transitionsBuilder:
