@@ -23,6 +23,7 @@ dependencies:
   hooks_riverpod: ^2.6.1
   freezed_annotation: ^2.4.4
   riverpod_annotation: ^2.6.1
+  flutter_hooks: ^0.21.2
 
   # Storage
   flutter_secure_storage: ^9.0.0
@@ -32,6 +33,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   go_router: ^13.1.0
   qr_flutter: ^4.1.0
+  flutter_svg: ^2.0.10
 
   # Internationalization
   intl: any
