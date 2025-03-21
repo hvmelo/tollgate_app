@@ -110,6 +110,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get navBarSettings;
+
+  /// No description provided for @navBarMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get navBarMap;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -124,31 +124,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         ],
       ),
       extendBodyBehindAppBar: true,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        backgroundColor: const Color(0xFF1A1F38),
-        selectedItemColor: const Color(0xFF65D36E),
-        unselectedItemColor: Colors.white.withOpacity(0.5),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.link), label: 'Connection'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            context.go('/');
-          } else if (index == 2) {
-            context.push('/wallet');
-          } else if (index == 3) {
-            context.push('/settings');
-          }
-        },
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

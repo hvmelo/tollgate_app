@@ -17,30 +17,34 @@ class WalletCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.push(Routes.wallet),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Wallet',
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 20),
-              if (walletState.isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else
-                Row(
+    return InkWell(
+      onTap: () => context.push(Routes.wallet),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Wallet',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            if (walletState.isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withAlpha(25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
                   children: [
                     Container(
                       width: 48,
@@ -91,18 +95,18 @@ class WalletCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'Tap to manage wallet',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface.withAlpha(179),
-                  ),
+              ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Tap to manage wallet',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withAlpha(179),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

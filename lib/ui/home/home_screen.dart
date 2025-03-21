@@ -37,7 +37,7 @@ class HomeScreen extends HookConsumerWidget {
       extendBodyBehindAppBar: true,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -47,7 +47,6 @@ class HomeScreen extends HookConsumerWidget {
                 connectionState: connectionState,
                 scanState: scanState,
               ),
-              const SizedBox(height: 20),
 
               // Wallet Card
               WalletCard(walletState: walletState),
@@ -62,7 +61,7 @@ class HomeScreen extends HookConsumerWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 70),
+      padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
           SizedBox(
@@ -78,7 +77,7 @@ class HomeScreen extends HookConsumerWidget {
             ),
           ),
           Text(
-            'Pay for internet access with Bitcoin',
+            'Pay-as-you-go Internet with Bitcoin',
             textAlign: TextAlign.center,
             style: context.textTheme.titleMedium?.copyWith(
               color: context.colorScheme.onSurface.withAlpha(150),

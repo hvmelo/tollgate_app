@@ -65,6 +65,12 @@ class NavigationShell extends ConsumerWidget {
             ),
             _buildNavigationDestination(
               context,
+              Icons.map_outlined,
+              Icons.map,
+              context.l10n.navBarMap,
+            ),
+            _buildNavigationDestination(
+              context,
               Icons.account_balance_wallet_outlined,
               Icons.account_balance_wallet,
               context.l10n.navBarWallet,

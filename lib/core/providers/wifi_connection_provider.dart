@@ -113,6 +113,7 @@ class WifiConnection extends _$WifiConnection {
         isConnected: true,
         connectedSsid: response.ssid,
         isLoading: false,
+        tollGateResponse: response,
       );
 
       return true;

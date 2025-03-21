@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tollgate_app/ui/map/map_screen.dart';
+import 'package:tollgate_app/ui/payment/payment_screen.dart';
 import 'package:tollgate_app/ui/settings/settings_screen.dart';
 
 import '../../connection_details/connection_screen.dart';
@@ -13,6 +15,7 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 final homeNavigatorKey = GlobalKey<NavigatorState>();
 final walletNavigatorKey = GlobalKey<NavigatorState>();
 final settingsNavigatorKey = GlobalKey<NavigatorState>();
+final mapNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Top go_router entry point.
 GoRouter router() => GoRouter(
@@ -58,7 +61,35 @@ GoRouter router() => GoRouter(
                                 _buildSlideLeftTransition(animation, child),
                       ),
                     ),
+                    GoRoute(
+                      path: 'payment',
+                      pageBuilder: (context, state) {
+                        final Map<String, dynamic>? networkData =
+                            state.extra as Map<String, dynamic>?;
+
+                        return CustomTransitionPage(
+                          child: PaymentScreen(networkData: networkData),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) =>
+                                  _buildSlideLeftTransition(animation, child),
+                        );
+                      },
+                    ),
                   ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              navigatorKey: mapNavigatorKey,
+              routes: [
+                GoRoute(
+                  path: Routes.map,
+                  pageBuilder: (context, state) => CustomTransitionPage(
+                    child: const MapScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) =>
+                            _buildFadeInTransition(animation, child),
+                  ),
                 ),
               ],
             ),

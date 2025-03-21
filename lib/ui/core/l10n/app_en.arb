@@ -2,5 +2,6 @@
   "@@locale": "en",
   "navBarHome": "Home",
   "navBarWallet": "Wallet",
-  "navBarSettings": "Settings"
+  "navBarSettings": "Settings",
+  "navBarMap": "Map"
 }

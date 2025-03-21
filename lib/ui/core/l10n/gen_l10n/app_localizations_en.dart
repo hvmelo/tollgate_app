@@ -16,4 +16,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navBarSettings => 'Settings';
+
+  @override
+  String get navBarMap => 'Map';
 }

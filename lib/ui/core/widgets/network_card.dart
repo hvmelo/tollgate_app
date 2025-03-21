@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../domain/models/wifi_network.dart';
+import '../router/routes.dart';
 
 class NetworkCard extends StatelessWidget {
   const NetworkCard({
@@ -28,17 +30,14 @@ class NetworkCard extends StatelessWidget {
         ((network.signalStrength + 100) / 100).clamp(0.0, 1.0);
 
     return InkWell(
-      onTap: onTap,
+      onTap: onTap ?? () => _navigateToPaymentScreen(context),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.primary.withAlpha(25),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: colorScheme.outline.withOpacity(0.1),
-          ),
         ),
         child: Row(
           children: [
@@ -104,5 +103,17 @@ class NetworkCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _navigateToPaymentScreen(BuildContext context) {
+    final networkData = {
+      'ssid': network.ssid,
+      'bssid': network.bssid,
+      'signalStrength': network.signalStrength,
+      'price': network.satsPerMin ?? 0,
+      'securityType': network.securityType,
+    };
+
+    context.push('${Routes.home}payment', extra: networkData);
   }
 }
