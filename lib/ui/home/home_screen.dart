@@ -77,7 +77,7 @@ class HomeScreen extends HookConsumerWidget {
             ),
           ),
           Text(
-            'Pay-as-you-go Internet with Bitcoin',
+            'Pay-as-You-Go Internet with Bitcoin',
             textAlign: TextAlign.center,
             style: context.textTheme.titleMedium?.copyWith(
               color: context.colorScheme.onSurface.withAlpha(150),

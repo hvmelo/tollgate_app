@@ -130,7 +130,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       providerName: 'TollGate Provider',
       satsPerMin: pricePerMin,
       initialCost: price,
-      description: 'Pay-as-you-go Internet Access',
+      description: 'Pay-as-You-Go Internet Access',
       networkId: networkId,
       ssid: ssid,
     );
@@ -179,72 +179,68 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Network information
-              Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.primary.withAlpha(25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: context.colorScheme.primary.withAlpha(50),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.wifi,
+                        color: context.colorScheme.primary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color:
-                                  context.colorScheme.primary.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.wifi,
-                              color: context.colorScheme.primary,
-                              size: 24,
+                          Text(
+                            ssid,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: context.colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ssid,
-                                  style:
-                                      context.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'TollGate Network - $price sats/min',
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: context.colorScheme.primary,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'TollGate Network - $price sats/min',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: context.colorScheme.primary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Package selection
               Text(
                 'Select Time Package',
                 style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Package grid
               GridView.builder(
@@ -252,9 +248,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1.4,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.6,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
                 ),
                 itemCount: _packages.length,
                 itemBuilder: (context, index) {
@@ -267,6 +263,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
+                        color: isSelected
+                            ? context.colorScheme.primary.withOpacity(0.1)
+                            : context.colorScheme.surface,
                         border: Border.all(
                           color: isSelected
                               ? context.colorScheme.primary
@@ -282,9 +281,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                             color: isSelected
                                 ? context.colorScheme.primary
                                 : context.colorScheme.onSurfaceVariant,
-                            size: 28,
+                            size: 24,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
                             package['name'],
                             style: context.textTheme.titleSmall?.copyWith(
@@ -295,7 +294,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                             ),
                           ),
                           if (index != 3) ...[
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               '${package['price']} sats',
                               style: context.textTheme.bodySmall?.copyWith(
@@ -314,7 +313,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
               // Custom amount input (visible only when custom package is selected)
               if (_selectedPackage == 3) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 TextField(
                   controller: _customAmountController,
                   keyboardType: TextInputType.number,
@@ -331,111 +330,172 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Auto-renew option
-              SwitchListTile(
-                title: Text(
-                  'Auto-renew',
-                  style: context.textTheme.titleSmall,
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _autoRenew
+                      ? context.colorScheme.primary.withOpacity(0.1)
+                      : context.colorScheme.surfaceContainerHighest
+                          .withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                subtitle: Text(
-                  'Automatically pay for more time when current package expires',
-                  style: context.textTheme.bodySmall,
-                ),
-                value: _autoRenew,
-                onChanged: (_) => _toggleAutoRenew(),
-                activeColor: context.colorScheme.primary,
-              ),
-
-              const SizedBox(height: 8),
-
-              // Divider
-              Divider(
-                color: context.colorScheme.outline.withOpacity(0.3),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Wallet balance and payment button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Wallet Balance',
-                        style: context.textTheme.titleSmall,
-                      ),
-                      Text(
-                        '$_walletBalance sats',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: hasEnoughBalance
-                              ? context.colorScheme.primary
-                              : context.colorScheme.error,
-                        ),
-                      ),
-                      if (!hasEnoughBalance)
-                        Text(
-                          'Not enough balance',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.error,
-                          ),
-                        ),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed: !hasEnoughBalance || _isProcessing
-                        ? null
-                        : _processPayment,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                child: SwitchListTile(
+                  title: Text(
+                    'Auto-renew',
+                    style: context.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: _autoRenew
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurface,
                     ),
-                    child: _isProcessing
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            'Pay $packagePrice sats',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
-                ],
+                  subtitle: Text(
+                    'Auto-pay when time expires',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  value: _autoRenew,
+                  onChanged: (_) => _toggleAutoRenew(),
+                  activeColor: context.colorScheme.primary,
+                  dense: true,
+                ),
               ),
 
               const SizedBox(height: 16),
 
-              OutlinedButton(
+              // Wallet balance and payment section
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          color: Colors.amber.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Wallet Balance',
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$_walletBalance sats',
+                              style: context.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: hasEnoughBalance
+                                    ? context.colorScheme.primary
+                                    : context.colorScheme.error,
+                              ),
+                            ),
+                            if (!hasEnoughBalance)
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: context.colorScheme.error,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Insufficient balance',
+                                    style:
+                                        context.textTheme.bodySmall?.copyWith(
+                                      color: context.colorScheme.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: !hasEnoughBalance || _isProcessing
+                              ? null
+                              : _processPayment,
+                          icon: _isProcessing
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Icon(Icons.bolt, size: 14),
+                          label: Text(
+                            _isProcessing
+                                ? 'Processing...'
+                                : 'Pay $packagePrice sats',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Add funds button with updated color
+              ElevatedButton.icon(
                 onPressed: () {
                   context.push('/wallet');
                 },
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                icon: const Icon(
+                  Icons.add,
+                  size: 14,
                 ),
-                child: Text(
+                label: const Text(
                   'Add funds to wallet',
                   style: TextStyle(
-                    color: context.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.colorScheme.secondary,
+                  foregroundColor: context.colorScheme.onSecondary,
+                  minimumSize: const Size(double.infinity, 42),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),

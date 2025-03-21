@@ -88,7 +88,7 @@ class WifiService {
       providerName: 'TollGate Provider',
       satsPerMin: 5 + _random.nextInt(25),
       initialCost: 1 + _random.nextInt(10),
-      description: 'Pay-as-you-go Wi-Fi access',
+      description: 'Pay-as-You-Go Wi-Fi access',
       mintUrl: 'https://mint.tollgate.network',
       paymentUrl: 'https://pay.tollgate.network',
       networkId: 'net_${_random.nextInt(1000)}',
