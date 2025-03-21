@@ -1,0 +1,59 @@
+name: tollgate_app
+description: "TollGate Wi-Fi Access App - Pay for Wi-Fi access with Bitcoin"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Wi-Fi scanning and connection
+  wifi_scan: ^0.4.1
+  wifi_iot: ^0.3.18
+  network_info_plus: ^4.1.0
+  permission_handler: ^11.1.0
+
+  # Networking
+  http: ^1.1.2
+  dio: ^5.4.0
+
+  # State management
+  hooks_riverpod: ^2.6.1
+  freezed_annotation: ^2.4.4
+  riverpod_annotation: ^2.6.1
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+
+  # UI components
+  cupertino_icons: ^1.0.6
+  go_router: ^13.1.0
+  qr_flutter: ^4.1.0
+
+  # Internationalization
+  intl: any
+  flutter_localizations:
+    sdk: flutter
+
+  # Utilities
+  connectivity_plus: ^5.0.2
+  crypto: ^3.0.3
+  uuid: ^4.2.2
+  logging: ^1.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  freezed: ^2.5.8
+  riverpod_generator: ^2.6.0
+  build_runner: ^2.4.15
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/
