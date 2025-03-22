@@ -150,7 +150,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+            Icon(
+              icon,
+              size: 32,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).primaryColor,
+            ),
             const SizedBox(height: 8),
             Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           ],
