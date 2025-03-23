@@ -7,7 +7,8 @@ import 'package:uuid/uuid.dart';
 
 import '../../domain/models/cashu_token.dart';
 import '../../domain/models/wallet_transaction.dart';
-import '../../data/services/cashu_service.dart';
+import '../../data/services/cashu_wallet/cashu_service.dart';
+import '../../data/services/service_factory.dart';
 
 part 'wallet_provider.g.dart';
 
@@ -46,11 +47,14 @@ class WalletState {
 
 @Riverpod(keepAlive: true)
 class Wallet extends _$Wallet {
-  final CashuService _cashuService = CashuService();
+  late final CashuService _cashuService;
   final _uuid = const Uuid();
 
   @override
   WalletState build() {
+    // Get the appropriate service implementation
+    _cashuService = ServiceFactory().getCashuService();
+
     _initialize();
     return WalletState(isLoading: true);
   }

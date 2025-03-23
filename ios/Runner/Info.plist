@@ -28,6 +28,10 @@
 	<string>This app needs access to location to show nearby TollGate points.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location to show nearby TollGate points.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to location to show nearby TollGate points.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs access to the local network to scan for WiFi networks.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

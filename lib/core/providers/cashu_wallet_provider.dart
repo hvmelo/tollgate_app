@@ -2,7 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/cashu_wallet.dart';
-import '../../data/services/cashu_service.dart';
+import '../../data/services/cashu_wallet/cashu_service.dart';
 
 part 'cashu_wallet_provider.g.dart';
 

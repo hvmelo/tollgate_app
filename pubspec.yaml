@@ -10,10 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   # Wi-Fi scanning and connection
-  wifi_scan: ^0.4.1
-  wifi_iot: ^0.3.18
-  network_info_plus: ^4.1.0
-  permission_handler: ^11.1.0
+  wifi_scan: ^0.4.1+2
+  wifi_iot: ^0.3.19+2
+  network_info_plus: ^6.1.3
+  permission_handler: ^11.4.0
 
   # Networking
   http: ^1.1.2

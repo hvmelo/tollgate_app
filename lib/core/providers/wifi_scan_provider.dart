@@ -1,75 +1,50 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../data/services/service_factory.dart';
+import '../../domain/errors/wifi_errors.dart';
 import '../../domain/models/wifi_network.dart';
-import '../../data/services/wifi_service.dart';
+import '../utils/result.dart';
 
 part 'wifi_scan_provider.g.dart';
 
-// Wi-Fi scan state
-class WiFiScanState {
-  final List<WiFiNetwork> networks;
-  final bool isLoading;
-  final String? error;
-  final bool isSupported;
+/// Provider that handles WiFi network scanning
+@riverpod
+Future<Result<List<WiFiNetwork>, WifiScanError>> scanWifiNetworks(
+    Ref ref) async {
+  final wifiService = ServiceFactory().getWifiService();
+  final result = await wifiService.scanNetworks();
 
-  WiFiScanState({
-    this.networks = const [],
-    this.isLoading = false,
-    this.error,
-    this.isSupported = true,
-  });
-
-  // TollGate networks
-  List<WiFiNetwork> get tollGateNetworks =>
-      networks.where((network) => network.isTollGate).toList();
-
-  // Regular networks
-  List<WiFiNetwork> get regularNetworks =>
-      networks.where((network) => !network.isTollGate).toList();
-
-  WiFiScanState copyWith({
-    List<WiFiNetwork>? networks,
-    bool? isLoading,
-    String? error,
-    bool? isSupported,
-  }) {
-    return WiFiScanState(
-      networks: networks ?? this.networks,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-      isSupported: isSupported ?? this.isSupported,
-    );
-  }
-}
-
-@Riverpod(keepAlive: true)
-class WifiScan extends _$WifiScan {
-  final WifiService _wifiService = WifiService();
-
-  @override
-  WiFiScanState build() {
-    return WiFiScanState();
-  }
-
-  Future<void> startScan() async {
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      final networks = await _wifiService.scanNetworks();
-
+  return result.fold(
+    (error) => Failure(error),
+    (networks) {
       // Sort networks by signal strength (strongest first)
       networks.sort((a, b) => b.signalStrength.compareTo(a.signalStrength));
+      return Success(networks);
+    },
+  );
+}
 
-      state = state.copyWith(networks: networks, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to scan networks: $e',
-      );
-    }
-  }
+/// Provider for TollGate networks only
+@riverpod
+Future<Result<List<WiFiNetwork>, WifiScanError>> tollGateNetworks(
+    Ref ref) async {
+  final networks = await ref.watch(scanWifiNetworksProvider.future);
+  return networks.fold(
+    (error) => Failure(error),
+    (networks) =>
+        Success(networks.where((network) => network.isTollGate).toList()),
+  );
+}
 
-  void setSupported(bool isSupported) {
-    state = state.copyWith(isSupported: isSupported);
-  }
+/// Provider for regular (non-TollGate) networks
+@riverpod
+Future<Result<List<WiFiNetwork>, WifiScanError>> regularNetworks(
+    Ref ref) async {
+  final networks = await ref.watch(scanWifiNetworksProvider.future);
+  return networks.fold(
+    (error) => Failure(error),
+    (networks) =>
+        Success(networks.where((network) => !network.isTollGate).toList()),
+  );
 }

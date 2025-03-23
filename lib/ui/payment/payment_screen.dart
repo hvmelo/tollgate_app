@@ -136,21 +136,35 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
 
     // Update the connection state in the provider
-    final connectionNotifier = ref.read(wifiConnectionProvider.notifier);
+    final connectionController =
+        ref.read(wifiConnectionControllerProvider.notifier);
 
-    // Simulate a connection with the payment
-    await connectionNotifier.connectWithPayment(tollGateResponse);
-
-    // Show success message and navigate back
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Payment successful! You are now connected.'),
-        backgroundColor: context.colorScheme.primary,
-      ),
+    // Connect to network with payment
+    final result = await connectionController.connectToNetwork(
+      ssid: tollGateResponse.ssid,
     );
 
-    // Go back to home screen
-    context.go(Routes.home);
+    result.when(
+      onSuccess: (response) {
+        // Show success message and navigate back
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Payment successful! You are now connected.'),
+            backgroundColor: context.colorScheme.primary,
+          ),
+        );
+        // Go back to home screen
+        context.go(Routes.home);
+      },
+      onFailure: (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connection failed'),
+            backgroundColor: context.colorScheme.error,
+          ),
+        );
+      },
+    );
   }
 
   @override

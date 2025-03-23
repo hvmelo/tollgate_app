@@ -7,13 +7,13 @@ import 'core/providers/core_providers.dart';
 import 'main.dart';
 import 'utils/provider_logger.dart';
 
-/// Development config entry point.
-/// Launch with `flutter run --target lib/main_development.dart`.
+/// Staging config entry point.
+/// Launch with `flutter run --target lib/main_staging.dart`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize app configuration for development mode
-  AppConfig.init(environment: AppEnvironment.development, useMocks: true);
+  // Initialize app configuration for staging mode with real implementations
+  AppConfig.init(environment: AppEnvironment.staging, useMocks: false);
 
   // Initialize the shared preferences
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -22,19 +22,7 @@ Future<void> main() async {
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWith((ref) => sharedPreferences),
-      // Use mock implementations in development mode
-      // if (AppConfig.useMocks) ...[
-      //   // Override the repository providers with mock implementations
-      //   multiMintWalletRepositoryProvider.overrideWith(
-      //     (ref) => FakeMultiMintWalletRepositoryImpl(),
-      //   ),
-      //   mintRepositoryProvider.overrideWith(
-      //     (ref) => FakeMintRepositoryImpl(),
-      //   ),
-      //   mintTransactionsRepositoryProvider.overrideWith(
-      //     (ref) => FakeMintTransactionsRepositoryImpl(),
-      //   ),
-      // ],
+      // No mock overrides for staging - we use real implementations
     ],
     observers: [ProviderLogger()],
   );

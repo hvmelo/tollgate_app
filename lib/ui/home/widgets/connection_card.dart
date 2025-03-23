@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'dart:async';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:tollgate_app/core/utils/async_value_x.dart';
 
 import '../../../core/providers/wifi_connection_provider.dart';
 import '../../../core/providers/wifi_scan_provider.dart';
+import '../../core/config/ui_constants.dart';
 import '../../core/router/routes.dart';
 import '../../core/widgets/network_card.dart';
-import '../../core/config/ui_constants.dart';
 
 class ConnectionCard extends HookConsumerWidget {
   final WifiConnectionState connectionState;
-  final WiFiScanState scanState;
 
   const ConnectionCard({
     super.key,
     required this.connectionState,
-    required this.scanState,
   });
 
   @override
@@ -42,17 +39,10 @@ class ConnectionCard extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 0),
-            if (connectionState.isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (connectionState.isConnected)
+            if (connectionState.isConnected)
               _buildConnectedContent(context, ref)
             else
-              _buildNotConnectedContent(context),
+              _buildNotConnectedContent(context, ref),
           ],
         ),
       ),
@@ -87,7 +77,9 @@ class ConnectionCard extends HookConsumerWidget {
 
       try {
         // Call the provider to disconnect
-        await ref.read(wifiConnectionProvider.notifier).disconnectFromNetwork();
+        await ref
+            .read(wifiConnectionControllerProvider.notifier)
+            .disconnectFromNetwork();
       } finally {
         // Close the dialog safely using Navigator.pop with the mounted check
         if (dialogContext.mounted) {
@@ -97,27 +89,9 @@ class ConnectionCard extends HookConsumerWidget {
     }
 
     // Mock data for connected state - replace with real data in production
-    final ValueNotifier<int> timeLeftMinutes =
-        useState(21); // Mock time left in minutes
+    final int timeLeftMinutes = 21; // Mock time left in minutes
     final int amountSpentSats = 38; // Mock amount spent in sats
     final bool autoRenewEnabled = true; // Mock auto-renew status
-
-    // Add countdown timer
-    useEffect(() {
-      final timer = Timer.periodic(const Duration(seconds: 15), (timer) {
-        if (timeLeftMinutes.value > 0) {
-          timeLeftMinutes.value -= 1;
-        } else {
-          timer.cancel();
-          // When time is over, disconnect
-          if (context.mounted) {
-            disconnectFromNetwork();
-          }
-        }
-      });
-
-      return () => timer.cancel();
-    }, []);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,24 +285,24 @@ class ConnectionCard extends HookConsumerWidget {
                               children: [
                                 Icon(
                                   Icons.timer_outlined,
-                                  color: timeLeftMinutes.value < 5
+                                  color: timeLeftMinutes < 5
                                       ? colorScheme.error
                                       : colorScheme.primary,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '${timeLeftMinutes.value} minutes',
+                                  '$timeLeftMinutes minutes',
                                   style: theme.textTheme.titleSmall?.copyWith(
-                                    color: timeLeftMinutes.value < 5
+                                    color: timeLeftMinutes < 5
                                         ? colorScheme.error
                                         : colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                if (timeLeftMinutes.value < 5)
+                                if (timeLeftMinutes < 5)
                                   const SizedBox(width: 4),
-                                if (timeLeftMinutes.value < 5)
+                                if (timeLeftMinutes < 5)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 6, vertical: 2),
@@ -528,62 +502,75 @@ class ConnectionCard extends HookConsumerWidget {
     );
   }
 
-  Widget _buildNotConnectedContent(BuildContext context) {
+  Widget _buildNotConnectedContent(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final tollGateNetworks = scanState.tollGateNetworks;
+    final networksAsync = ref.watch(scanWifiNetworksProvider).flatten;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Not Connected',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: colorScheme.error,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (scanState.isLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (tollGateNetworks.isEmpty)
-          Text(
-            'No TollGate Networks Found',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
-            ),
-          )
-        else ...[
-          ...tollGateNetworks.take(homeScreenMaxNetworksToShow).map(
-                (network) => NetworkCard(
-                  network: network,
-                ),
-              ),
-          if (tollGateNetworks.length > homeScreenMaxNetworksToShow)
-            TextButton(
-              onPressed: () => context.push(Routes.scan),
-              child: Text(
-                '+${tollGateNetworks.length - homeScreenMaxNetworksToShow} TollGate Networks',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: colorScheme.primary,
-                ),
+    return networksAsync.when(
+      data: (networks) {
+        final tollGateNetworks =
+            networks.where((network) => network.isTollGate).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Not Connected',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.error,
+                fontWeight: FontWeight.w500,
               ),
             ),
-        ],
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => context.push(Routes.scan),
-            child: const Text('More Networks'),
-          ),
+            const SizedBox(height: 16),
+            if (networksAsync.isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (tollGateNetworks.isEmpty)
+              Text(
+                'No TollGate Networks Found',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              )
+            else ...[
+              ...tollGateNetworks.take(homeScreenMaxNetworksToShow).map(
+                    (network) => NetworkCard(
+                      network: network,
+                    ),
+                  ),
+              if (tollGateNetworks.length > homeScreenMaxNetworksToShow)
+                TextButton(
+                  onPressed: () => context.push(Routes.scan),
+                  child: Text(
+                    '+${tollGateNetworks.length - homeScreenMaxNetworksToShow} TollGate Networks',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+            ],
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => context.push(Routes.scan),
+                child: const Text('More Networks'),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: CircularProgressIndicator(),
         ),
-      ],
+      ),
+      error: (error, stack) => Text('Error: $error'),
     );
   }
 }

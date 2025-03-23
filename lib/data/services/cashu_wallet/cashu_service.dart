@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../domain/models/cashu_token.dart';
+import '../../../domain/models/cashu_token.dart';
 
 /// Service to interact with Cashu mints
 class CashuService {
