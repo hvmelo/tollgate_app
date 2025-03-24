@@ -34,13 +34,20 @@ Future<Result<Unit, WifiConnectionError>> connectToNetwork(
 @riverpod
 Future<Result<Unit, WifiRegistrationError>> registerNetwork(
   Ref ref,
-  WiFiNetwork network,
+  WiFiNetwork network, {
   String? password,
-) async {
+}) async {
   final wifiService = ref.watch(wifiServiceProvider);
-  return wifiService.registerNetwork(
+  final result = await wifiService.registerNetwork(
     ssid: network.ssid,
     bssid: network.bssid,
     password: password,
+  );
+  return result.fold(
+    (success) {
+      ref.invalidate(currentConnectionProvider);
+      return Success(unit);
+    },
+    (failure) => Failure(failure),
   );
 }

@@ -12,8 +12,8 @@ import '../../core/providers/wifi_providers.dart';
 import '../../core/router/routes.dart';
 import '../../core/widgets/network_card.dart';
 
-class NotConnectedCard extends ConsumerWidget {
-  const NotConnectedCard({super.key});
+class AvailableTollgateNetworksCard extends ConsumerWidget {
+  const AvailableTollgateNetworksCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,8 +23,11 @@ class NotConnectedCard extends ConsumerWidget {
       data: (networks) {
         return _buildCard(context, ref, networks: networks);
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
+      loading: () => SizedBox(
+        height: 180,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
       error: (error, stack) => Text('Error: $error'),
     );
@@ -41,6 +44,13 @@ class NotConnectedCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          'Available TollGate Networks:',
+          style: context.textTheme.labelMedium?.copyWith(
+            color: context.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
         if (networks.isEmpty)
           Text(
             'No TollGate Networks Found',
@@ -53,9 +63,7 @@ class NotConnectedCard extends ConsumerWidget {
                 (network) => NetworkCard(
                   network: network,
                   onTap: () {
-                    ref.read(connectToNetworkProvider(
-                      network,
-                    ));
+                    ref.read(registerNetworkProvider(network));
                   },
                 ),
               ),

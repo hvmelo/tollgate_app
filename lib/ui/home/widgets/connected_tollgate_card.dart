@@ -6,35 +6,25 @@ import 'package:tollgate_app/ui/core/utils/extensions/build_context_x.dart';
 
 import '../../../data/services/connectivity/connectivity_service.dart';
 import '../../../domain/models/tollgate_info.dart';
+import '../../core/providers/connectivity_stream_provider.dart';
 import '../../core/router/routes.dart';
 import '../../core/utils/tollgate_utils.dart';
-
-part 'connected_tollgate_card.g.dart';
-
-@riverpod
-Stream<bool> connectivityService(Ref ref) async* {
-  final service = ConnectivityService();
-  ref.onDispose(() => service.dispose());
-  yield* service.internetStatus;
-}
+import '../../core/widgets/buttons/app_button.dart';
 
 class ConnectedTollgateCard extends ConsumerWidget {
   final String ssid;
   final TollgateInfo tollgateInfo;
-  final VoidCallback? onDisconnect;
+  final bool hasInternet;
 
   const ConnectedTollgateCard({
     super.key,
     required this.ssid,
     required this.tollgateInfo,
-    this.onDisconnect,
+    required this.hasInternet,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasInternet =
-        ref.watch(connectivityServiceProvider).valueOrNull ?? false;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,7 +119,7 @@ class ConnectedTollgateCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
@@ -164,66 +154,20 @@ class ConnectedTollgateCard extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 20),
-
         // Action buttons
         Row(
           children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: onDisconnect,
-                icon: const Icon(
-                  Icons.close,
-                  size: 18,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  'Disconnect',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                style: ButtonStyle(
-                  backgroundColor:
-                      WidgetStateProperty.all(context.colorScheme.error),
-                  padding: WidgetStateProperty.all(
-                      const EdgeInsets.symmetric(vertical: 10)),
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
             if (hasInternet)
               Expanded(
-                child: ElevatedButton.icon(
+                child: AppButton(
+                  label: 'Buy Access',
+                  icon: Icons.bolt,
                   onPressed: () {
                     context.push('${Routes.home}payment', extra: {
                       'ssid': ssid,
                       'tollgateInfo': tollgateInfo,
                     });
                   },
-                  icon: const Icon(
-                    Icons.bolt,
-                    size: 14,
-                  ),
-                  label: const Text(
-                    'Buy Access',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
                 ),
               ),
           ],

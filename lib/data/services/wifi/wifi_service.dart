@@ -234,13 +234,6 @@ class WifiService {
     }
   }
 
-  /// Check if a network is a TollGate network
-  bool checkIfTollGateNetwork(String ssid) {
-    final isTollGate =
-        ssid.contains('TollGate') || ssid.toLowerCase().contains('tollgate');
-    return isTollGate;
-  }
-
   /// Disconnect from the current network
   Future<Result<Unit, WiFiDisconnectionError>> disconnectFromNetwork() async {
     try {

@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../data/services/payment/payment_service.dart';
 import '../../data/services/service_factory.dart';
 import '../../domain/models/tollgate_info.dart';
-import '../utils/result.dart';
 import 'tollgate_provider.dart';
 
 // Provider for the payment service

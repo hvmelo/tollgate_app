@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tollgate_app/core/utils/async_value_x.dart';
+import 'package:tollgate_app/ui/core/providers/connectivity_stream_provider.dart';
 import 'package:tollgate_app/ui/core/utils/extensions/build_context_x.dart';
 
+import '../../core/providers/tollgate_provider.dart';
 import '../../core/providers/wallet_provider.dart';
+import '../../domain/models/wifi_connection_info.dart';
 import '../core/providers/current_connection_provider.dart';
-import 'widgets/connection_card.dart';
+import '../core/themes/colors.dart';
+import 'widgets/connected_non_tollgate_card.dart';
+import 'widgets/connected_tollgate_card.dart';
+import 'widgets/connection_status_card.dart';
+import 'widgets/available_tollgate_networks_card.dart';
 import 'widgets/wallet_card.dart';
 
 class HomeScreen extends HookConsumerWidget {
@@ -15,6 +23,8 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentConnectionStateAsync = ref.watch(currentConnectionProvider);
+    final hasInternet =
+        ref.watch(connectivityStreamProvider).valueOrNull ?? false;
     final walletState = ref.watch(walletProvider);
 
     ref.listen(
@@ -52,18 +62,24 @@ class HomeScreen extends HookConsumerWidget {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(context),
-                // Connection Status Card
-                ConnectionCard(
-                  connectionInfo: currentConnectionState.connectionInfo,
-                  onDisconnect: () => _disconnectFromNetwork(context, ref),
-                ),
-                // Wallet Card
-                WalletCard(walletState: walletState),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(context),
+                  // Connection Status Card
+                  _buildWifiConnectionSection(
+                    context,
+                    ref,
+                    currentConnectionState: currentConnectionState,
+                    hasInternet: hasInternet,
+                  ),
+                  const SizedBox(height: 30),
+                  // Wallet Card
+                  WalletCard(walletState: walletState),
+                ],
+              ),
             ),
           ),
         ),
@@ -106,30 +122,72 @@ class HomeScreen extends HookConsumerWidget {
     );
   }
 
-  void _disconnectFromNetwork(BuildContext context, WidgetRef ref) async {
-    // Show confirmation dialog
-    final shouldDisconnect = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Disconnect'),
-        content: const Text(
-            'Are you sure you want to disconnect from this network?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+  Widget _buildWifiConnectionSection(
+    BuildContext context,
+    WidgetRef ref, {
+    required CurrentConnectionState currentConnectionState,
+    required bool hasInternet,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Wi-Fi Connection',
+          style: context.textTheme.titleMedium?.copyWith(
+            color: context.colorScheme.onSurface,
           ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('OK'),
-          ),
-        ],
+        ),
+        const SizedBox(height: 8),
+        ConnectionStatusCard(
+          connectionInfo: currentConnectionState.connectionInfo,
+          hasInternet: hasInternet,
+        ),
+        const SizedBox(height: 16),
+        if (currentConnectionState.connectionInfo != null)
+          if (currentConnectionState.connectionInfo!.isTollGate)
+            _buildTollgateCard(
+              ref,
+              connectionInfo: currentConnectionState.connectionInfo!,
+              hasInternet: hasInternet,
+            )
+          else
+            ConnectedNonTollgateCard(
+              ssid: currentConnectionState.connectionInfo!.ssid ??
+                  'Unknown Network',
+            )
+        else
+          const AvailableTollgateNetworksCard(),
+      ],
+    );
+  }
+
+  Widget _buildTollgateCard(
+    WidgetRef ref, {
+    required WifiConnectionInfo connectionInfo,
+    required bool hasInternet,
+  }) {
+    final routerIp = connectionInfo.gatewayIp;
+
+    if (routerIp == null) {
+      return ConnectedNonTollgateCard(
+        ssid: connectionInfo.ssid ?? 'Unknown Network',
+      );
+    }
+
+    final tollGateInfoAsync = ref.watch(tollgateInfoProvider(routerIp)).flatten;
+
+    return tollGateInfoAsync.when(
+      data: (tollGateInfo) => ConnectedTollgateCard(
+        ssid: connectionInfo.ssid ?? 'Unknown Network',
+        tollgateInfo: tollGateInfo,
+        hasInternet: hasInternet,
+      ),
+      error: (error, stack) => ConnectedNonTollgateCard(
+        ssid: connectionInfo.ssid ?? 'Unknown Network',
+      ),
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
-
-    if (shouldDisconnect == true) {
-      // Call the provider to disconnect
-      await ref.read(currentConnectionProvider.notifier).disconnect();
-    }
   }
 }
