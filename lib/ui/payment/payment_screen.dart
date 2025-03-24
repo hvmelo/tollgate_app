@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tollgate_app/ui/core/providers/wifi_providers.dart';
 import 'package:tollgate_app/ui/core/utils/extensions/build_context_x.dart';
 import 'package:tollgate_app/ui/core/router/routes.dart';
 
-import '../../../core/providers/wifi_connection_provider.dart';
 import '../../../domain/models/wifi_network.dart';
 import '../../../domain/models/toll_gate_response.dart';
+import '../core/providers/current_connection_provider.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? networkData;
@@ -135,17 +136,19 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ssid: ssid,
     );
 
-    // Update the connection state in the provider
-    final connectionController =
-        ref.read(wifiConnectionControllerProvider.notifier);
-
     // Connect to network with payment
-    final result = await connectionController.connectToNetwork(
-      ssid: tollGateResponse.ssid,
-    );
+    final resultAsync = ref.read(connectToNetworkProvider(
+      WiFiNetwork(
+        ssid: ssid,
+        bssid: networkData['bssid'] ?? '',
+        securityType: networkData['securityType'] ?? '',
+        frequency: networkData['frequency'] ?? 0,
+        signalStrength: networkData['signalStrength'] ?? 0,
+      ),
+    ));
 
-    result.when(
-      onSuccess: (response) {
+    resultAsync.when(
+      data: (response) {
         // Show success message and navigate back
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -153,16 +156,22 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             backgroundColor: context.colorScheme.primary,
           ),
         );
-        // Go back to home screen
-        context.go(Routes.home);
       },
-      onFailure: (error) {
+      loading: () => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Connecting...'),
+          backgroundColor: context.colorScheme.primary,
+        ),
+      ),
+      error: (error, stackTrace) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Connection failed'),
+            content: const Text('Connection failed'),
             backgroundColor: context.colorScheme.error,
           ),
         );
+        // Go back to home screen
+        context.go(Routes.home);
       },
     );
   }

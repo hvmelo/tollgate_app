@@ -12,8 +12,8 @@ sealed class Result<T, E> {
       };
 
   E? getErrorOrNull() => switch (this) {
-        Failure(error: final error) => error,
         Success() => null,
+        Failure(error: final error) => error,
       };
 
   T getOrElse(T Function() fallback) => switch (this) {
@@ -37,7 +37,7 @@ sealed class Result<T, E> {
         Failure(error: final error) => Failure(error),
       };
 
-  R fold<R>(R Function(E error) onFailure, R Function(T value) onSuccess) =>
+  R fold<R>(R Function(T value) onSuccess, R Function(E error) onFailure) =>
       switch (this) {
         Success(value: final value) => onSuccess(value),
         Failure(error: final error) => onFailure(error),

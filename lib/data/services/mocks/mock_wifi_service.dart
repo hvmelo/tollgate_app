@@ -4,24 +4,48 @@ import 'dart:math';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/unit.dart';
 import '../../../domain/errors/wifi_errors.dart';
-import '../../../domain/models/toll_gate_response.dart';
 import '../../../domain/models/wifi_network.dart';
+import '../../../domain/models/wifi_connection_info.dart';
 import '../wifi/wifi_service.dart';
 
 /// Mock implementation of the WifiService for development environments
 class MockWifiService implements WifiService {
   final Random _random = Random();
-  String? _connectedSsid;
+  final bool _shouldSucceed;
+  final Duration _delay;
+  WiFiNetwork? _mockConnectedNetwork;
+
+  MockWifiService({
+    bool shouldSucceed = true,
+    Duration delay = const Duration(milliseconds: 500),
+  })  : _shouldSucceed = shouldSucceed,
+        _delay = delay;
 
   @override
-  Future<Result<String, WifiGetCurrentConnectionError>>
+  Future<Result<WifiConnectionInfo?, WifiGetCurrentConnectionError>>
       getCurrentConnection() async {
-    // Simulate checking the current connection
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _connectedSsid != null
-        ? Success(_connectedSsid!)
-        : Failure(WifiGetCurrentConnectionError.failedToGetCurrentConnection(
-            "No active connection"));
+    await Future.delayed(_delay);
+
+    if (!_shouldSucceed) {
+      return Failure(
+        WifiGetCurrentConnectionError.failedToGetCurrentConnection(
+            'Mock error'),
+      );
+    }
+
+    if (_mockConnectedNetwork == null) {
+      return const Success(null);
+    }
+
+    // Create a mock connection info
+    return Success(WifiConnectionInfo(
+      ssid: _mockConnectedNetwork!.ssid,
+      bssid: '00:11:22:33:44:55', // Mock BSSID
+      ipAddress: '192.168.1.100', // Mock IP
+      subnet: '255.255.255.0', // Mock subnet
+      gatewayIp: '192.168.1.1', // Mock gateway
+      broadcast: '192.168.1.255', // Mock broadcast
+    ));
   }
 
   @override
@@ -78,7 +102,8 @@ class MockWifiService implements WifiService {
   }
 
   @override
-  Future<Result<Unit, WifiConnectionError>> connectToNetwork(String ssid,
+  Future<Result<Unit, WifiConnectionError>> connectToNetwork(
+      WiFiNetwork network,
       [String? password]) async {
     // Simulate connection process
     await Future.delayed(const Duration(seconds: 1));
@@ -86,10 +111,9 @@ class MockWifiService implements WifiService {
     // Simulate random connection failure (10% chance)
     if (_random.nextInt(10) == 0) {
       return Failure(WifiConnectionError.connectionFailed(
-          'Failed to connect to $ssid. The network may not be in range or requires a password.'));
+          'Failed to connect to ${network.ssid}. The network may not be in range or requires a password.'));
     }
 
-    _connectedSsid = ssid;
     return const Success(unit);
   }
 
@@ -99,55 +123,27 @@ class MockWifiService implements WifiService {
   }
 
   @override
-  Future<Result<TollGateResponse, TollGateInfoResponseError>> getTollGateInfo(
-      String ssid) async {
-    // Simulate network info retrieval
-    await Future.delayed(const Duration(seconds: 1));
-
-    final response = TollGateResponse(
-      providerName: 'TollGate Development',
-      satsPerMin: 5 + _random.nextInt(25),
-      initialCost: 1 + _random.nextInt(10),
-      description: 'Development TollGate Network',
-      mintUrl: 'https://test-mint.tollgate.network',
-      paymentUrl: 'https://test-pay.tollgate.network',
-      networkId: 'dev_${_random.nextInt(1000)}',
-      ssid: ssid,
-    );
-
-    return Success(response);
-  }
-
-  @override
-  Future<Result<Unit, TollGatePaymentError>> processPayment(
-      TollGateResponse response) async {
-    // Simulate payment processing
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Simulate random payment failure (5% chance)
-    if (_random.nextInt(20) == 0) {
-      return Failure(const TollGatePaymentError.paymentFailed(
-          'Payment processing failed'));
-    }
-
-    return const Success(unit);
-  }
-
-  @override
   Future<Result<Unit, WiFiDisconnectionError>> disconnectFromNetwork() async {
     // Simulate disconnection
     await Future.delayed(const Duration(milliseconds: 300));
-    _connectedSsid = null;
     return const Success(unit);
   }
 
   @override
-  String _getSecurityType(String capabilities) {
-    final String caps = capabilities.toUpperCase();
-    if (caps.contains('WPA3')) return 'WPA3';
-    if (caps.contains('WPA2')) return 'WPA2';
-    if (caps.contains('WPA')) return 'WPA';
-    if (caps.contains('WEP')) return 'WEP';
-    return 'Open';
+  Future<Result<Unit, WifiRegistrationError>> registerNetwork({
+    required String ssid,
+    String? bssid,
+    String? password,
+  }) async {
+    await Future.delayed(_delay);
+    _mockConnectedNetwork = WiFiNetwork(
+      ssid: ssid,
+      bssid: bssid ?? '00:11:22:33:44:55',
+      signalStrength: -50,
+      frequency: 2400,
+      securityType: password != null ? 'WPA2' : 'Open',
+      isTollGate: false,
+    );
+    return const Success(unit);
   }
 }

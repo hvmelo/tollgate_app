@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tollgate_app/core/utils/async_value_x.dart';
 import 'package:tollgate_app/ui/core/utils/extensions/build_context_x.dart';
 
 import '../../../core/providers/wifi_scan_provider.dart';
 import '../core/widgets/network_card.dart';
-import '../../../domain/models/wifi_network.dart';
 
 class ScanScreen extends HookConsumerWidget {
   const ScanScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final networksAsync = ref.watch(scanWifiNetworksProvider).flatten;
-    final isFirstLoad = useState(true);
+    final networksAsync = ref.watch(wifiNetworksStreamProvider).flatten;
 
     // Function to refresh the network list
     Future<void> refreshNetworks() async {
-      ref.invalidate(scanWifiNetworksProvider);
+      ref.invalidate(wifiNetworksStreamProvider);
     }
 
     return networksAsync.when(
@@ -172,7 +170,7 @@ class ScanScreen extends HookConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              ref.invalidate(scanWifiNetworksProvider);
+              ref.invalidate(wifiNetworksStreamProvider);
             },
             icon: const Icon(Icons.refresh, size: 16),
             label: const Text('Scan Again'),

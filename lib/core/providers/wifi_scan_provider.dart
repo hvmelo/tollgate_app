@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:async';
 
 import '../../data/services/service_factory.dart';
 import '../../domain/errors/wifi_errors.dart';
@@ -8,43 +9,25 @@ import '../utils/result.dart';
 
 part 'wifi_scan_provider.g.dart';
 
-/// Provider that handles WiFi network scanning
+/// Provider that handles WiFi network scanning and updates every 10 seconds
 @riverpod
-Future<Result<List<WiFiNetwork>, WifiScanError>> scanWifiNetworks(
-    Ref ref) async {
+Stream<Result<List<WiFiNetwork>, WifiScanError>> wifiNetworksStream(
+    Ref ref) async* {
   final wifiService = ServiceFactory().getWifiService();
-  final result = await wifiService.scanNetworks();
 
-  return result.fold(
-    (error) => Failure(error),
-    (networks) {
-      // Sort networks by signal strength (strongest first)
-      networks.sort((a, b) => b.signalStrength.compareTo(a.signalStrength));
-      return Success(networks);
-    },
-  );
-}
+  while (true) {
+    final result = await wifiService.scanNetworks();
+    yield result.fold(
+      (networks) {
+        // Sort networks by signal strength (strongest first)
+        networks.sort((a, b) => b.signalStrength.compareTo(a.signalStrength));
+        return Success(networks);
+      },
+      (error) {
+        return Failure(error);
+      },
+    );
 
-/// Provider for TollGate networks only
-@riverpod
-Future<Result<List<WiFiNetwork>, WifiScanError>> tollGateNetworks(
-    Ref ref) async {
-  final networks = await ref.watch(scanWifiNetworksProvider.future);
-  return networks.fold(
-    (error) => Failure(error),
-    (networks) =>
-        Success(networks.where((network) => network.isTollGate).toList()),
-  );
-}
-
-/// Provider for regular (non-TollGate) networks
-@riverpod
-Future<Result<List<WiFiNetwork>, WifiScanError>> regularNetworks(
-    Ref ref) async {
-  final networks = await ref.watch(scanWifiNetworksProvider.future);
-  return networks.fold(
-    (error) => Failure(error),
-    (networks) =>
-        Success(networks.where((network) => !network.isTollGate).toList()),
-  );
+    await Future.delayed(const Duration(seconds: 10));
+  }
 }

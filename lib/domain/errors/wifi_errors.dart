@@ -33,6 +33,12 @@ class WifiConnectionError with _$WifiConnectionError {
 }
 
 @freezed
+class WifiRegistrationError with _$WifiRegistrationError {
+  const factory WifiRegistrationError.registrationFailed(String? message) =
+      RegistrationFailed;
+}
+
+@freezed
 class WiFiDisconnectionError with _$WiFiDisconnectionError {
   const factory WiFiDisconnectionError.disconnectionFailed(String? message) =
       DisconnectionFailed;

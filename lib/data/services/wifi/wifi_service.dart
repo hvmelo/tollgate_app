@@ -3,14 +3,13 @@ import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 import 'package:tollgate_app/core/utils/unit.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 
 import '../../../core/utils/result.dart';
 import '../../../domain/errors/wifi_errors.dart';
-import '../../../domain/models/toll_gate_response.dart';
+import '../../../domain/models/wifi_connection_info.dart';
 import '../../../domain/models/wifi_network.dart';
 import '../permissions/permissions_service.dart';
 
@@ -18,36 +17,26 @@ import '../permissions/permissions_service.dart';
 class WifiService {
   final PermissionsService _permissionsService = PermissionsService();
   final Random _random = Random();
-  final NetworkInfo _networkInfo = NetworkInfo();
 
-  /// Get the current Wi-Fi connection
-  Future<Result<String?, WifiGetCurrentConnectionError>>
+  /// Gets information about the current WiFi connection
+  Future<Result<WifiConnectionInfo?, WifiGetCurrentConnectionError>>
       getCurrentConnection() async {
     try {
-      // Check if we have the necessary permissions
-      final hasPermissions = await _permissionsService.hasWiFiScanPermissions();
-      if (!hasPermissions) {
-        final granted = await _permissionsService.requestWiFiScanPermissions();
-        if (!granted) {
-          return Failure(
-              const WifiGetCurrentConnectionError.permissionDenied());
-        }
+      // Get connection info using network_info_plus
+      final connectionInfo = await WifiConnectionInfo.fromNetworkInfo();
+
+      if (!connectionInfo.isConnected) {
+        return const Success(null); // Not connected to any network
       }
 
-      // Get the SSID of the currently connected WiFi network
-      final wifiName = await _networkInfo.getWifiName();
-
-      // The SSID usually comes with quotes, so remove them if present
-      if (wifiName != null) {
-        return Success(wifiName.replaceAll('"', ''));
-      }
-
-      return const Success(null);
+      return Success(connectionInfo);
     } catch (e) {
       debugPrint('Error getting current connection: $e');
       return Failure(
-          const WifiGetCurrentConnectionError.failedToGetCurrentConnection(
-              "Failed to get current WiFi connection"));
+        WifiGetCurrentConnectionError.failedToGetCurrentConnection(
+          e.toString(),
+        ),
+      );
     }
   }
 
@@ -162,7 +151,8 @@ class WifiService {
   }
 
   /// Connect to a Wi-Fi network
-  Future<Result<Unit, WifiConnectionError>> connectToNetwork(String ssid,
+  Future<Result<Unit, WifiConnectionError>> connectToNetwork(
+      WiFiNetwork network,
       [String? password]) async {
     try {
       // Check if we have the necessary permissions
@@ -180,26 +170,30 @@ class WifiService {
         if (password != null) {
           // Connect with password
           final result = await WiFiForIoTPlugin.connect(
-            ssid,
+            network.ssid,
+            bssid: network.bssid,
             password: password,
-            security: NetworkSecurity.WPA, // Adjust security type as needed
+            security: _networkSecurityForString(network.securityType),
+            withInternet: true,
           );
+
+          await WiFiForIoTPlugin.forceWifiUsage(true);
 
           if (!result) {
             return Failure(WifiConnectionError.connectionFailed(
-              'Failed to connect to $ssid. Please check the password and try again.',
+              'Failed to connect to ${network.ssid}. Please check the password and try again.',
             ));
           }
         } else {
           // Connect to open network
           final result = await WiFiForIoTPlugin.connect(
-            ssid,
+            network.ssid,
             security: NetworkSecurity.NONE,
           );
 
           if (!result) {
             return Failure(WifiConnectionError.connectionFailed(
-              'Failed to connect to $ssid. The network may not be in range or requires a password.',
+              'Failed to connect to ${network.ssid}. The network may not be in range or requires a password.',
             ));
           }
         }
@@ -212,7 +206,31 @@ class WifiService {
     } catch (e) {
       debugPrint('Error connecting to network: $e');
       return Failure(WifiConnectionError.connectionFailed(
-          'Failed to connect to $ssid: ${e.toString()}'));
+          'Failed to connect to ${network.ssid}: ${e.toString()}'));
+    }
+  }
+
+  Future<Result<Unit, WifiRegistrationError>> registerNetwork({
+    required String ssid,
+    String? bssid,
+    String? password,
+  }) async {
+    try {
+      final result = await WiFiForIoTPlugin.registerWifiNetwork(
+        ssid,
+        bssid: bssid,
+        password: password,
+      );
+      if (!result) {
+        return Failure(const WifiRegistrationError.registrationFailed(
+          'Failed to register network',
+        ));
+      }
+      return const Success(unit);
+    } catch (e) {
+      debugPrint('Error registering network: $e');
+      return Failure(const WifiRegistrationError.registrationFailed(
+          'Failed to register network'));
     }
   }
 
@@ -221,56 +239,6 @@ class WifiService {
     final isTollGate =
         ssid.contains('TollGate') || ssid.toLowerCase().contains('tollgate');
     return isTollGate;
-  }
-
-  /// Get information about a TollGate network
-  Future<Result<TollGateResponse, TollGateInfoResponseError>> getTollGateInfo(
-      String ssid) async {
-    try {
-      // This would be implemented to communicate with the TollGate server
-      // For now, we'll create a mock response
-      await Future.delayed(const Duration(seconds: 1));
-
-      final tollGateResponse = TollGateResponse(
-        providerName: 'TollGate Network',
-        satsPerMin: 10,
-        initialCost: 5,
-        description: 'Pay-per-use WiFi network',
-        mintUrl: 'https://mint.tollgate.network',
-        paymentUrl: 'https://pay.tollgate.network',
-        networkId: 'tg_${_random.nextInt(1000)}',
-        ssid: ssid,
-      );
-
-      return Success(tollGateResponse);
-    } catch (e) {
-      debugPrint('Error getting TollGate information: $e');
-      return Failure(TollGateInfoResponseError.responseFailed(
-          'Failed to get information for $ssid'));
-    }
-  }
-
-  /// Process payment for a TollGate network
-  Future<Result<Unit, TollGatePaymentError>> processPayment(
-      TollGateResponse response) async {
-    try {
-      // This would implement actual payment processing with the TollGate server
-      // For now, just simulate the process
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Simulate random failure (5% chance)
-      if (_random.nextInt(20) == 0) {
-        return Failure(const TollGatePaymentError.paymentFailed(
-          'Payment processing failed. Please try again.',
-        ));
-      }
-
-      return const Success(unit);
-    } catch (e) {
-      debugPrint('Error processing payment: $e');
-      return Failure(
-          TollGatePaymentError.paymentFailed('Failed to process payment'));
-    }
   }
 
   /// Disconnect from the current network
@@ -295,6 +263,22 @@ class WifiService {
       debugPrint('Error disconnecting from network: $e');
       return Failure(WiFiDisconnectionError.disconnectionFailed(
           'Failed to disconnect from network'));
+    }
+  }
+
+  NetworkSecurity _networkSecurityForString(String security) {
+    switch (security.toLowerCase()) {
+      case 'wpa':
+      case 'wpa2':
+      case 'wpa/wpa2':
+        return NetworkSecurity.WPA;
+      case 'wep':
+        return NetworkSecurity.WEP;
+      case 'none':
+      case 'open':
+        return NetworkSecurity.NONE;
+      default:
+        return NetworkSecurity.NONE;
     }
   }
 }

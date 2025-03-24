@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../domain/models/toll_gate_response.dart';
-import '../../domain/models/wifi_network.dart';
-import '../../core/providers/wallet_provider.dart';
-import '../../core/providers/wifi_connection_provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? networkData;
