@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import '../../../core/utils/result.dart';
-import '../../../core/utils/unit.dart';
+import '../../../core/result/result.dart';
+import '../../../core/result/unit.dart';
 import '../../../domain/errors/wifi_errors.dart';
-import '../../../domain/models/wifi_network.dart';
-import '../../../domain/models/wifi_connection_info.dart';
+import '../../../domain/models/wifi/wifi_network.dart';
+import '../../../domain/models/wifi/wifi_connection_info.dart';
 import '../wifi/wifi_service.dart';
 
 /// Mock implementation of the WifiService for development environments
@@ -145,5 +145,12 @@ class MockWifiService implements WifiService {
       isTollGate: false,
     );
     return const Success(unit);
+  }
+
+  @override
+  Future<Result<bool, WifiRegistrationError>> isNetworkRegistered(
+      WiFiNetwork network) {
+    // TODO: implement isNetworkRegistered
+    throw UnimplementedError();
   }
 }

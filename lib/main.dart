@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'core/providers/core_providers.dart';
+import 'config/themes/theme_provider.dart';
 import 'main_development.dart' as development;
-import 'ui/core/l10n/gen_l10n/app_localizations.dart';
-import 'ui/core/router/app_router.dart';
-import 'ui/core/themes/theme.dart';
-import 'ui/core/widgets/environment_banner.dart';
+import 'config/l10n/gen_l10n/app_localizations.dart';
+import 'presentation/router/app_router.dart';
+import 'config/themes/theme.dart';
+import 'presentation/common/widgets/environment_banner.dart';
 
 /// Default main method
 Future<void> main() async {

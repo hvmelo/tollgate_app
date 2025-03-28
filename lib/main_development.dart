@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tollgate_app/config/app_config.dart';
 
-import 'core/providers/core_providers.dart';
+import 'config/environment/environment_config.dart';
+import 'config/environment/environment_provider.dart';
+import 'config/storage/shared_preferences_provider.dart';
 import 'main.dart';
-import 'utils/provider_logger.dart';
+import 'config/logging/provider_logger.dart';
 
 /// Development config entry point.
 /// Launch with `flutter run --target lib/main_development.dart`.
@@ -13,7 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize app configuration for development mode
-  AppConfig.init(environment: AppEnvironment.development, useMocks: true);
+  final env = EnvironmentConfig.development();
 
   // Initialize the shared preferences
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -22,19 +23,7 @@ Future<void> main() async {
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWith((ref) => sharedPreferences),
-      // Use mock implementations in development mode
-      // if (AppConfig.useMocks) ...[
-      //   // Override the repository providers with mock implementations
-      //   multiMintWalletRepositoryProvider.overrideWith(
-      //     (ref) => FakeMultiMintWalletRepositoryImpl(),
-      //   ),
-      //   mintRepositoryProvider.overrideWith(
-      //     (ref) => FakeMintRepositoryImpl(),
-      //   ),
-      //   mintTransactionsRepositoryProvider.overrideWith(
-      //     (ref) => FakeMintTransactionsRepositoryImpl(),
-      //   ),
-      // ],
+      environmentConfigProvider.overrideWith((ref) => env),
     ],
     observers: [ProviderLogger()],
   );

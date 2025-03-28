@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:tollgate_app/domain/errors/tollgate_errors.dart';
 
-import '../../../core/utils/result.dart';
-import '../../../domain/models/tollgate_info.dart';
+import '../../../core/result/result.dart';
+import '../../../domain/models/tollgate/tollgate_info.dart';
 
 class TollgateService {
   final String _defaultPort;
@@ -15,7 +15,7 @@ class TollgateService {
   ///
   /// [routerIp] is the IP address of the router, e.g., '192.168.1.1'
   /// [port] is optional and defaults to '2121'
-  Future<Result<TollgateInfo, TollgateInfoRetrievalError>> getTollgateInfo(
+  Future<Result<TollGateInfo, TollgateInfoRetrievalError>> getTollgateInfo(
       {required String routerIp, String? port = '2121'}) async {
     final targetPort = port ?? _defaultPort;
     final url = 'http://$routerIp:$targetPort';
@@ -28,7 +28,7 @@ class TollgateService {
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        return Success(TollgateInfo.fromJson(jsonData));
+        return Success(TollGateInfo.fromJson(jsonData));
       } else {
         return Failure(
           TollgateInfoRetrievalError.failedToGetTollgateInfo(

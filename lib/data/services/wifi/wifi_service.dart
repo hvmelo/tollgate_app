@@ -3,14 +3,14 @@ import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:tollgate_app/core/utils/unit.dart';
+import 'package:tollgate_app/core/result/unit.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 
-import '../../../core/utils/result.dart';
+import '../../../core/result/result.dart';
 import '../../../domain/errors/wifi_errors.dart';
-import '../../../domain/models/wifi_connection_info.dart';
-import '../../../domain/models/wifi_network.dart';
+import '../../../domain/models/wifi/wifi_connection_info.dart';
+import '../../../domain/models/wifi/wifi_network.dart';
 import '../permissions/permissions_service.dart';
 
 /// Service to interact with Wi-Fi networks
@@ -232,6 +232,14 @@ class WifiService {
       return Failure(const WifiRegistrationError.registrationFailed(
           'Failed to register network'));
     }
+  }
+
+  Future<Result<bool, WifiRegistrationError>> isNetworkRegistered(
+      WiFiNetwork network) async {
+    final result = await WiFiForIoTPlugin.isRegisteredWifiNetwork(
+      network.ssid,
+    );
+    return Success(result);
   }
 
   /// Disconnect from the current network
