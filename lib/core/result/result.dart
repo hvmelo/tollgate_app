@@ -1,92 +1,115 @@
-// lib/core/common/sealed_result.dart
+// Copyright 2024 The Flutter team. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+/// Utility class to wrap result data
+///
+/// Evaluate the result using a switch statement:
+/// ```dart
+/// switch (result) {
+///   case Ok(): {
+///     print(result.value);
+///   }
+///   case Failure(): {
+///     print(result.failure);
+///   }
+/// }
+/// ```
 sealed class Result<T, E> {
   const Result();
 
-  bool get isSuccess => this is Success<T, E>;
-  bool get isFailure => this is Failure<T, E>;
+  /// Creates a successful [Result], completed with the specified [value].
+  const factory Result.ok(T value) = Ok<T, E>._;
 
-  T? getOrNull() => switch (this) {
-        Success(value: final value) => value,
-        Failure() => null,
-      };
+  /// Creates an error [Result], completed with the specified [failure].
+  const factory Result.failure(
+    E failure, {
+    StackTrace? stackTrace,
+  }) = Failure<T, E>._;
 
-  E? getErrorOrNull() => switch (this) {
-        Success() => null,
-        Failure(error: final error) => error,
-      };
+  bool get isOk => this is Ok;
+  bool get isFailure => this is Failure;
 
-  T getOrElse(T Function() fallback) => switch (this) {
-        Success(value: final value) => value,
-        Failure() => fallback(),
-      };
+  /// Returns the contained [Ok] value, or null if the result is an [Failure]
+  T? get value {
+    return switch (this) {
+      Ok(value: final v) => v,
+      Failure() => null,
+    };
+  }
 
-  Result<R, E> map<R>(R Function(T value) transform) => switch (this) {
-        Success(value: final value) => Success(transform(value)),
-        Failure(error: final error) => Failure(error),
-      };
+  /// Returns the contained [Failure] value, or null if the result is [Ok]
+  E? get failure {
+    return switch (this) {
+      Ok() => null,
+      Failure(failure: final e) => e,
+    };
+  }
 
-  Result<T, F> mapError<F>(F Function(E error) transform) => switch (this) {
-        Success(value: final value) => Success(value),
-        Failure(error: final error) => Failure(transform(error)),
+  /// Maps a Result<`T`, `E`> to Result<`R`, `E`> by applying a function to the
+  /// contained [Ok] value, leaving an [Failure] value untouched.
+  ///
+  /// This function can be used to compose the results of two functions.
+  Result<R, E> map<R>(R Function(T) mapper) {
+    return switch (this) {
+      Ok(value: final v) => Result.ok(mapper(v)),
+      Failure(failure: final e, stackTrace: final st) =>
+        Result.failure(e, stackTrace: st),
+    };
+  }
+
+  Result<T, F> mapFailure<F>(F Function(E error) transform) => switch (this) {
+        Ok(value: final value) => Result.ok(value),
+        Failure(failure: final error) => Result.failure(transform(error)),
       };
 
   Result<R, E> flatMap<R>(Result<R, E> Function(T value) transform) =>
       switch (this) {
-        Success(value: final value) => transform(value),
-        Failure(error: final error) => Failure(error),
+        Ok(value: final value) => transform(value),
+        Failure(failure: final error) => Result.failure(error),
       };
 
-  R fold<R>(R Function(T value) onSuccess, R Function(E error) onFailure) =>
-      switch (this) {
-        Success(value: final value) => onSuccess(value),
-        Failure(error: final error) => onFailure(error),
-      };
-
-  void when({
-    required void Function(T value) onSuccess,
-    required void Function(E error) onFailure,
+  R fold<R>({
+    required R Function(T value) onSuccess,
+    required R Function(E error) onFailure,
   }) =>
       switch (this) {
-        Success(value: final value) => onSuccess(value),
-        Failure(error: final error) => onFailure(error),
+        Ok(value: final value) => onSuccess(value),
+        Failure(failure: final error) => onFailure(error),
       };
+
+  /// Maps a Result<T, E> to Result<R, E> by applying a function that returns
+  /// a Result to the contained [Ok] value, leaving an [Failure] value untouched.
+  ///
+  /// Alias for flatMap() method.
+  Result<R, E> andThen<R>(Result<R, E> Function(T) mapper) => flatMap(mapper);
 }
 
-final class Success<T, E> extends Result<T, E> {
+/// Subclass of Result for values
+final class Ok<T, E> extends Result<T, E> {
+  const Ok._(this.value);
+
+  /// Returned value in result
+  @override
   final T value;
-  const Success(this.value);
+
+  @override
+  String toString() => 'Result<$T>.ok($value)';
 }
 
+/// Subclass of Result for errors
 final class Failure<T, E> extends Result<T, E> {
-  final E error;
-  const Failure(this.error);
-}
+  const Failure._(
+    this.failure, {
+    this.stackTrace,
+  });
 
-extension ResultExtension<T, E> on Result<T, E> {
-  bool get isSuccess => this is Success<T, E>;
-  bool get isFailure => this is Failure<T, E>;
+  /// Returned error in result
+  @override
+  final E failure;
+  final StackTrace? stackTrace;
 
-  R? whenOrNull<R>({
-    R Function(T value)? onSuccess,
-    R Function(E error)? onFailure,
-  }) {
-    if (this is Success<T, E>) {
-      return onSuccess?.call((this as Success<T, E>).value);
-    } else if (this is Failure<T, E>) {
-      return onFailure?.call((this as Failure<T, E>).error);
-    }
-    return null;
-  }
-
-  void inspect({
-    void Function(T value)? onSuccess,
-    void Function(E error)? onFailure,
-  }) {
-    if (this is Success<T, E> && onSuccess != null) {
-      onSuccess((this as Success<T, E>).value);
-    } else if (this is Failure<T, E> && onFailure != null) {
-      onFailure((this as Failure<T, E>).error);
-    }
-  }
+  @override
+  String toString() =>
+      'Result<$T>.failure($failure, ${stackTrace?.toString() ?? 'no stack trace'})';
 }

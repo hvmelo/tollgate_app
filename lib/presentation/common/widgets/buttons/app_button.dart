@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 enum AppButtonVariant {
   primary,
+  secondary,
   destructive,
   cancel,
 }
@@ -32,6 +33,18 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.primary => ButtonStyle(
           backgroundColor: WidgetStateProperty.all(colorScheme.primary),
           foregroundColor: WidgetStateProperty.all(colorScheme.onPrimary),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(vertical: 10),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      AppButtonVariant.secondary => ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(colorScheme.secondary),
+          foregroundColor: WidgetStateProperty.all(colorScheme.onSecondary),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(vertical: 10),
           ),
@@ -94,7 +107,7 @@ class AppButton extends StatelessWidget {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: 16,
           ),
         ),
       ],

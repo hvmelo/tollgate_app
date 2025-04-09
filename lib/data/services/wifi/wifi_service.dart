@@ -8,9 +8,9 @@ import 'package:wifi_iot/wifi_iot.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 
 import '../../../core/result/result.dart';
-import '../../../domain/errors/wifi_errors.dart';
-import '../../../domain/models/wifi/wifi_connection_info.dart';
-import '../../../domain/models/wifi/wifi_network.dart';
+import '../../../domain/wifi/errors/wifi_errors.dart';
+import '../../../domain/wifi/models/wifi_connection_info.dart';
+import '../../../domain/wifi/models/wifi_network.dart';
 import '../permissions/permissions_service.dart';
 
 /// Service to interact with Wi-Fi networks
@@ -26,13 +26,13 @@ class WifiService {
       final connectionInfo = await WifiConnectionInfo.fromNetworkInfo();
 
       if (!connectionInfo.isConnected) {
-        return const Success(null); // Not connected to any network
+        return const Result.ok(null); // Not connected to any network
       }
 
-      return Success(connectionInfo);
+      return Result.ok(connectionInfo);
     } catch (e) {
       debugPrint('Error getting current connection: $e');
-      return Failure(
+      return Result.failure(
         WifiGetCurrentConnectionError.failedToGetCurrentConnection(
           e.toString(),
         ),
@@ -49,14 +49,14 @@ class WifiService {
         final granted = await _permissionsService.requestWiFiScanPermissions();
         if (!granted) {
           // If permissions not granted, return a failure with explanation
-          return Failure(const WifiScanError.permissionDenied());
+          return Result.failure(const WifiScanError.permissionDenied());
         }
       }
 
       // Check if we can scan
       final canStartScan = await WiFiScan.instance.canStartScan();
       if (canStartScan != CanStartScan.yes) {
-        return Failure(_getErrorFromCanStartScan(canStartScan));
+        return Result.failure(_getErrorFromCanStartScan(canStartScan));
       }
 
       // Start the scan
@@ -68,7 +68,7 @@ class WifiService {
       // Check if we can get the results
       final canGetResults = await WiFiScan.instance.canGetScannedResults();
       if (canGetResults != CanGetScannedResults.yes) {
-        return Failure(_getErrorFromCanGetScannedResults(canGetResults));
+        return Result.failure(_getErrorFromCanGetScannedResults(canGetResults));
       }
 
       // Get the scanned results
@@ -96,11 +96,11 @@ class WifiService {
         );
       }
 
-      return Success(networks);
+      return Result.ok(networks);
     } catch (e) {
       debugPrint('Error scanning networks: $e');
       // Return a failure with the error message
-      return Failure(
+      return Result.failure(
           const WifiScanError.scanFailed("Failed to scan WiFi networks"));
     }
   }
@@ -160,7 +160,7 @@ class WifiService {
       if (!hasPermissions) {
         final granted = await _permissionsService.requestWiFiScanPermissions();
         if (!granted) {
-          return Failure(const WifiConnectionError.permissionDenied());
+          return Result.failure(const WifiConnectionError.permissionDenied());
         }
       }
 
@@ -177,10 +177,8 @@ class WifiService {
             withInternet: true,
           );
 
-          await WiFiForIoTPlugin.forceWifiUsage(true);
-
           if (!result) {
-            return Failure(WifiConnectionError.connectionFailed(
+            return Result.failure(WifiConnectionError.connectionFailed(
               'Failed to connect to ${network.ssid}. Please check the password and try again.',
             ));
           }
@@ -188,29 +186,33 @@ class WifiService {
           // Connect to open network
           final result = await WiFiForIoTPlugin.connect(
             network.ssid,
-            security: NetworkSecurity.NONE,
+            bssid: network.bssid,
+            security: _networkSecurityForString(network.securityType),
+            withInternet: true,
           );
 
           if (!result) {
-            return Failure(WifiConnectionError.connectionFailed(
+            return Result.failure(WifiConnectionError.connectionFailed(
               'Failed to connect to ${network.ssid}. The network may not be in range or requires a password.',
             ));
           }
+
+          await WiFiForIoTPlugin.forceWifiUsage(true);
         }
 
-        return const Success(unit);
+        return const Result.ok(unit);
       } else {
         // iOS doesn't allow programmatic WiFi connection
-        return Failure(const WifiConnectionError.platformNotSupported());
+        return Result.failure(const WifiConnectionError.platformNotSupported());
       }
     } catch (e) {
       debugPrint('Error connecting to network: $e');
-      return Failure(WifiConnectionError.connectionFailed(
+      return Result.failure(WifiConnectionError.connectionFailed(
           'Failed to connect to ${network.ssid}: ${e.toString()}'));
     }
   }
 
-  Future<Result<Unit, WifiRegistrationError>> registerNetwork({
+  Future<Result<bool, WifiConnectionError>> registerNetwork({
     required String ssid,
     String? bssid,
     String? password,
@@ -221,25 +223,21 @@ class WifiService {
         bssid: bssid,
         password: password,
       );
-      if (!result) {
-        return Failure(const WifiRegistrationError.registrationFailed(
-          'Failed to register network',
-        ));
-      }
-      return const Success(unit);
+
+      return Result.ok(result);
     } catch (e) {
       debugPrint('Error registering network: $e');
-      return Failure(const WifiRegistrationError.registrationFailed(
+      return Result.failure(const WifiConnectionError.registrationFailed(
           'Failed to register network'));
     }
   }
 
-  Future<Result<bool, WifiRegistrationError>> isNetworkRegistered(
+  Future<Result<bool, WifiConnectionError>> isNetworkRegistered(
       WiFiNetwork network) async {
     final result = await WiFiForIoTPlugin.isRegisteredWifiNetwork(
       network.ssid,
     );
-    return Success(result);
+    return Result.ok(result);
   }
 
   /// Disconnect from the current network
@@ -250,7 +248,8 @@ class WifiService {
         final result = await WiFiForIoTPlugin.disconnect();
 
         if (!result) {
-          return Failure(const WiFiDisconnectionError.disconnectionFailed(
+          return Result.failure(
+              const WiFiDisconnectionError.disconnectionFailed(
             'Failed to disconnect from network',
           ));
         }
@@ -259,10 +258,10 @@ class WifiService {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      return const Success(unit);
+      return const Result.ok(unit);
     } catch (e) {
       debugPrint('Error disconnecting from network: $e');
-      return Failure(WiFiDisconnectionError.disconnectionFailed(
+      return Result.failure(WiFiDisconnectionError.disconnectionFailed(
           'Failed to disconnect from network'));
     }
   }

@@ -1,56 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tollgate_app/presentation/common/extensions/async_value_x.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 import 'package:tollgate_app/presentation/common/providers/connectivity_stream_provider.dart';
 
-import '../../common/providers/tollgate_providers.dart';
-import '../../../domain/models/wifi/wifi_connection_info.dart';
-import '../../common/providers/current_connection_provider.dart';
+import '../../../domain/wifi/models/wifi_connection_info.dart';
+import '../tollgate/providers/tollgate_providers.dart';
+import '../wifi/providers/current_connection_state_stream_provider.dart';
 import 'widgets/available_tollgate_networks_card.dart';
 import 'widgets/connected_non_tollgate_card.dart';
 import 'widgets/connected_tollgate_card.dart';
 import 'widgets/connection_status_card.dart';
+import 'widgets/wallet_card.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentConnectionStateAsync = ref.watch(currentConnectionProvider);
+    final currentConnectionStateAsync =
+        ref.watch(currentConnectionStateStreamProvider);
     final hasInternet =
         ref.watch(connectivityStreamProvider).valueOrNull ?? false;
-
-    ref.listen(
-        currentConnectionProvider.selectAsync((state) => state.isDisconnecting),
-        (previous, next) async {
-      if (previous == next) return;
-      final isDisconnecting = await next;
-      if (isDisconnecting) {
-        if (context.mounted) {
-          await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (dialogContext) => const AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Disconnecting...'),
-                ],
-              ),
-            ),
-          );
-        }
-      } else {
-        if (context.mounted) {
-          context.pop();
-        }
-      }
-    });
 
     return currentConnectionStateAsync.when(
       data: (currentConnectionState) => Scaffold(
@@ -73,7 +45,7 @@ class HomeScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 30),
                   // Wallet Card
-                  //WalletCard(walletState: walletState),
+                  const WalletCard(),
                 ],
               ),
             ),

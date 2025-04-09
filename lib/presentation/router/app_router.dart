@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tollgate_app/presentation/features/map/map_screen.dart';
-import 'package:tollgate_app/presentation/features/payment/payment_screen.dart';
+import 'package:tollgate_app/presentation/features/tollgate/map/map_screen.dart';
+import 'package:tollgate_app/presentation/features/tollgate/payment/payment_screen.dart';
 import 'package:tollgate_app/presentation/features/settings/settings_screen.dart';
 
-import '../features/connection_details/connection_screen.dart';
+import '../features/wallet/send/send_screen.dart';
+import '../features/wifi/connection_details/connection_screen.dart';
 import '../features/home/home_screen.dart';
-import '../features/network_scan/scan_screen.dart';
+import '../features/wifi/network_scan/scan_screen.dart';
 import '../features/wallet/wallet_screen.dart';
+import '../features/wallet/mint/mint_screen.dart';
 import '../common/layout/navigation_shell.dart';
 import 'routes.dart';
 
@@ -93,20 +95,43 @@ GoRouter router() => GoRouter(
                 ),
               ],
             ),
-            // StatefulShellBranch(
-            //   navigatorKey: walletNavigatorKey,
-            //   routes: [
-            //     GoRoute(
-            //       path: Routes.wallet,
-            //       pageBuilder: (context, state) => CustomTransitionPage(
-            //         child: const WalletScreen(),
-            //         transitionsBuilder:
-            //             (context, animation, secondaryAnimation, child) =>
-            //                 _buildFadeInTransition(animation, child),
-            //       ),
-            //     ),
-            //   ],
-            // ),
+            StatefulShellBranch(
+              navigatorKey: walletNavigatorKey,
+              routes: [
+                GoRoute(
+                  path: Routes.wallet,
+                  pageBuilder: (context, state) => CustomTransitionPage(
+                    child: const WalletScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) =>
+                            _buildFadeInTransition(
+                      animation,
+                      child,
+                    ),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'mint',
+                      pageBuilder: (context, state) => CustomTransitionPage(
+                        child: const MintScreen(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) =>
+                                _buildSlideLeftTransition(animation, child),
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'send',
+                      pageBuilder: (context, state) => CustomTransitionPage(
+                        child: const SendScreen(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) =>
+                                _buildSlideLeftTransition(animation, child),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             StatefulShellBranch(
               navigatorKey: settingsNavigatorKey,
               routes: [
@@ -114,9 +139,16 @@ GoRouter router() => GoRouter(
                   path: Routes.settings,
                   pageBuilder: (context, state) => CustomTransitionPage(
                     child: const SettingsScreen(),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) =>
-                            _buildFadeInTransition(animation, child),
+                    transitionsBuilder: (
+                      context,
+                      animation,
+                      secondaryAnimation,
+                      child,
+                    ) =>
+                        _buildFadeInTransition(
+                      animation,
+                      child,
+                    ),
                   ),
                 ),
               ],

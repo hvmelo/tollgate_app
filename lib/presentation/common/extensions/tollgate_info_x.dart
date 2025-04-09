@@ -1,4 +1,4 @@
-import 'package:tollgate_app/domain/models/tollgate/tollgate_info.dart';
+import 'package:tollgate_app/domain/tollgate/models/tollgate_info.dart';
 
 extension TollgateInfoX on TollGateInfo {
   String humanReadablePrice() {

@@ -3,18 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tollgate_app/presentation/common/extensions/async_value_x.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
-import '../../../../domain/models/wifi/wifi_network.dart';
-import '../home_constants.dart';
-import '../../../common/providers/wifi_providers.dart';
+import '../../../../domain/wifi/models/wifi_network.dart';
+import '../../wifi/providers/scan_networks_stream_provider.dart';
+import '../constants/home_constants.dart';
+import '../../wifi/providers/connect_to_network_provider.dart';
 import '../../../router/routes.dart';
-import '../../../common/widgets/network_card.dart';
+import '../../wifi/widgets/network_card.dart';
 
 class AvailableTollgateNetworksCard extends ConsumerWidget {
   const AvailableTollgateNetworksCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final networksAsync = ref.watch(wifiNetworksStreamProvider).flatten;
+    final networksAsync = ref.watch(scanNetworksStreamProvider).flatten;
 
     return networksAsync.when(
       data: (networks) {
@@ -60,7 +61,7 @@ class AvailableTollgateNetworksCard extends ConsumerWidget {
                 (network) => NetworkCard(
                   network: network,
                   onTap: () {
-                    ref.read(registerNetworkProvider(network));
+                    ref.read(connectToNetworkProvider(network));
                   },
                 ),
               ),

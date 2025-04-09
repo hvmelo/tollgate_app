@@ -3,5 +3,14 @@
   "navBarHome": "Home",
   "navBarWallet": "Wallet",
   "navBarSettings": "Settings",
-  "navBarMap": "Map"
+  "navBarMap": "Map",
+  
+  "mintScreenTitle": "Mint",
+  "mintScreenAmountInSatsLabel": "Amount in Sats",
+  "mintScreenCreateInvoice": "Create Invoice",
+  "mintScreenCopyInvoice": "Copy Invoice",
+  "mintScreenClose": "Close",
+  "mintScreenInvoiceCopied": "Invoice copied to clipboard",
+  "mintScreenAmountTooLarge": "Amount must be less than {maxAmount} sats",
+  "mintScreenAmountNegativeOrZero": "Amount must be greater than 0"
 }

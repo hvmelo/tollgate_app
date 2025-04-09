@@ -83,4 +83,13 @@ abstract final class AppColors {
     surfaceContainerLow:
         Color(0xFF3A3F51), // Slightly lighter than surface for containers
   );
+
+  // Action colors
+  static final actionColors = {
+    'send': orange,
+    'receive': green,
+    'scan': blue,
+    'mint': purple,
+    'melt': blue,
+  };
 }

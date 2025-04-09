@@ -4,7 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tollgate_app/config/environment/environment_provider.dart';
 
 import 'config/environment/environment_config.dart';
+import 'config/providers/repository_providers.dart';
+import 'config/providers/service_providers.dart';
 import 'config/storage/shared_preferences_provider.dart';
+import 'domain/wallet/value_objects/mint_url.dart';
 import 'main.dart';
 import 'config/logging/provider_logger.dart';
 
@@ -26,6 +29,16 @@ Future<void> main() async {
       environmentConfigProvider.overrideWith((ref) => env),
     ],
     observers: [ProviderLogger()],
+  );
+
+  // Let's add a initial mint to the wallet
+  final walletRepo = await container.read(walletRepositoryProvider.future);
+  await walletRepo.addMint(MintUrl.fromData('https://testnut.cashu.space'));
+
+  // Let's add the current mint
+  final cashuLocalPreferences = container.read(cashuLocalPreferencesProvider);
+  cashuLocalPreferences.saveCurrentMintUrl(
+    'https://testnut.cashu.space',
   );
 
   runApp(

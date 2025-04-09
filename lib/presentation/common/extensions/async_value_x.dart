@@ -5,9 +5,10 @@ import '../../../core/result/result.dart';
 extension AsyncValueEither<T, E> on AsyncValue<Result<T, E>> {
   AsyncValue<T> get flatten {
     return when(
-      data: (failureOrEntity) => failureOrEntity.fold(
-        AsyncValue.data,
-        (failure) => AsyncValue.error(failure as Object, StackTrace.current),
+      data: (result) => result.fold(
+        onSuccess: (data) => AsyncValue.data(data),
+        onFailure: (error) =>
+            AsyncValue.error(error as Object, StackTrace.current),
       ),
       error: AsyncError.new,
       loading: AsyncLoading.new,

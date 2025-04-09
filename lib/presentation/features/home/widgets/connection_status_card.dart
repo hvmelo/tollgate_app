@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tollgate_app/domain/models/wifi/wifi_connection_info.dart';
+import 'package:tollgate_app/domain/wifi/models/wifi_connection_info.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 
 class ConnectionStatusCard extends StatelessWidget {

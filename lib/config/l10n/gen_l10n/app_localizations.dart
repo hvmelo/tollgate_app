@@ -116,6 +116,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map'**
   String get navBarMap;
+
+  /// No description provided for @mintScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint'**
+  String get mintScreenTitle;
+
+  /// No description provided for @mintScreenAmountInSatsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in Sats'**
+  String get mintScreenAmountInSatsLabel;
+
+  /// No description provided for @mintScreenCreateInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Invoice'**
+  String get mintScreenCreateInvoice;
+
+  /// No description provided for @mintScreenCopyInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Invoice'**
+  String get mintScreenCopyInvoice;
+
+  /// No description provided for @mintScreenClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get mintScreenClose;
+
+  /// No description provided for @mintScreenInvoiceCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice copied to clipboard'**
+  String get mintScreenInvoiceCopied;
+
+  /// No description provided for @mintScreenAmountTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be less than {maxAmount} sats'**
+  String mintScreenAmountTooLarge(Object maxAmount);
+
+  /// No description provided for @mintScreenAmountNegativeOrZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than 0'**
+  String get mintScreenAmountNegativeOrZero;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../common/providers/tollgate_providers.dart';
-import '../../../../domain/models/tollgate/tollgate_info.dart';
+import '../../tollgate/providers/tollgate_providers.dart';
+import '../../../../domain/tollgate/models/tollgate_info.dart';
 
 class TollgateInfoCard extends ConsumerWidget {
   final TollGateInfo tollgateInfo;

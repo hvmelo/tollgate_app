@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:tollgate_app/domain/errors/tollgate_errors.dart';
+import 'package:tollgate_app/domain/tollgate/errors/tollgate_errors.dart';
 
 import '../../../core/result/result.dart';
-import '../../../domain/models/tollgate/tollgate_info.dart';
+import '../../../domain/tollgate/models/tollgate_info.dart';
 
 class TollgateService {
   final String _defaultPort;
@@ -28,16 +28,16 @@ class TollgateService {
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        return Success(TollGateInfo.fromJson(jsonData));
+        return Result.ok(TollGateInfo.fromJson(jsonData));
       } else {
-        return Failure(
+        return Result.failure(
           TollgateInfoRetrievalError.failedToGetTollgateInfo(
               'Failed to load Tollgate info: HTTP ${response.statusCode}'),
         );
       }
     } catch (e) {
       debugPrint('Error fetching Tollgate info: $e');
-      return Failure(
+      return Result.failure(
         TollgateInfoRetrievalError.failedToGetTollgateInfo(
             'Failed to connect to Tollgate: ${e.toString()}'),
       );
@@ -56,7 +56,7 @@ class TollgateService {
         .map(
       (info) => true, // If we got info, it's a Tollgate
     )
-        .mapError(
+        .mapFailure(
       (error) {
         // If it's a connection error, it may not be a Tollgate
         return TollgateInfoRetrievalError.failedToGetTollgateInfo(

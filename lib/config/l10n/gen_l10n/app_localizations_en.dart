@@ -19,4 +19,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navBarMap => 'Map';
+
+  @override
+  String get mintScreenTitle => 'Mint';
+
+  @override
+  String get mintScreenAmountInSatsLabel => 'Amount in Sats';
+
+  @override
+  String get mintScreenCreateInvoice => 'Create Invoice';
+
+  @override
+  String get mintScreenCopyInvoice => 'Copy Invoice';
+
+  @override
+  String get mintScreenClose => 'Close';
+
+  @override
+  String get mintScreenInvoiceCopied => 'Invoice copied to clipboard';
+
+  @override
+  String mintScreenAmountTooLarge(Object maxAmount) {
+    return 'Amount must be less than $maxAmount sats';
+  }
+
+  @override
+  String get mintScreenAmountNegativeOrZero => 'Amount must be greater than 0';
 }
