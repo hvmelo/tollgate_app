@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../../domain/wallet/value_objects/mint_amount.dart';
-import '../../providers/mint_transactions_provider.dart';
+import '../../providers/mint_transactions_providers.dart';
 
 part 'invoice_display_notifier.g.dart';
 

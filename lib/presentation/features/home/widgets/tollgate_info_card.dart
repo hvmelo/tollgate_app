@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 
 import '../../tollgate/providers/tollgate_providers.dart';
 import '../../../../domain/tollgate/models/tollgate_info.dart';
@@ -14,7 +15,12 @@ class TollgateInfoCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
+      color: isDarkMode
+          ? context.colorScheme.primary.withAlpha(25)
+          : Color(0xFFFAFAFA),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16),

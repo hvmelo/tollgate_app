@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tollgate_app/presentation/router/routes.dart';
 
 import 'widgets/action_card.dart';
 import 'widgets/balance_card.dart';
+import 'widgets/secondary_action_card.dart';
 import 'widgets/recent_transactions_widget.dart';
 
 class WalletScreen extends ConsumerWidget {
@@ -34,7 +36,7 @@ class WalletScreen extends ConsumerWidget {
                 const SizedBox(height: 28),
                 const BalanceCard(),
                 const SizedBox(height: 16),
-                _buildActionGrid(context),
+                _buildActionCards(context),
                 const SizedBox(height: 24),
                 const RecentTransactionsWidget(),
               ],
@@ -45,64 +47,106 @@ class WalletScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionGrid(BuildContext context) {
+  Widget _buildActionCards(BuildContext context) {
     final actionColors = {
       'send': Colors.blue,
       'receive': Colors.green,
       'mint': Colors.orange,
       'melt': Colors.red,
+      'reserve': Colors.purple,
     };
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.1,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Send Button
-        ActionCard(
-          icon: Icons.arrow_upward_rounded,
-          title: 'Send',
-          subtitle: 'Send sats to others',
-          color: actionColors['send']!,
-          onTap: () {
-            context.go('/wallet/send');
-          },
+        // Primary Actions - Top Row
+        Text(
+          'Primary Actions',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 8),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 1.1,
+          children: [
+            // Mint Button
+            ActionCard(
+              icon: Icons.local_atm_rounded,
+              title: 'Mint',
+              subtitle: 'Add funds to wallet',
+              color: actionColors['mint']!,
+              onTap: () {
+                context.go('/wallet/mint');
+              },
+            ),
+
+            // Reserve Button (New)
+            ActionCard(
+              icon: Icons.offline_bolt_rounded,
+              title: 'Reserve',
+              subtitle: 'Store offline ecash for TollGate',
+              color: actionColors['reserve']!,
+              onTap: () {
+                context.go(Routes.reserve);
+              },
+            ),
+          ],
         ),
 
-        // Receive Button
-        ActionCard(
-          icon: Icons.arrow_downward_rounded,
-          title: 'Receive',
-          subtitle: 'Receive sats from others',
-          color: actionColors['receive']!,
-          onTap: () {
-            // TODO: Navigate to receive screen
-          },
-        ),
+        const SizedBox(height: 24),
 
-        // Mint Button
-        ActionCard(
-          icon: Icons.local_atm_rounded,
-          title: 'Mint',
-          subtitle: 'Add funds to wallet',
-          color: actionColors['mint']!,
-          onTap: () {
-            context.go('/wallet/mint');
-          },
+        // Secondary Actions - Bottom Row
+        Text(
+          'Other Actions',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
+        const SizedBox(height: 8),
+        GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.0,
+          children: [
+            // Send Button
+            SecondaryActionCard(
+              icon: Icons.arrow_upward_rounded,
+              title: 'Send',
+              color: actionColors['send']!,
+              onTap: () {
+                context.go('/wallet/send');
+              },
+            ),
 
-        // Melt Button
-        ActionCard(
-          icon: Icons.currency_bitcoin,
-          title: 'Melt',
-          subtitle: 'Convert to Bitcoin',
-          color: actionColors['melt']!,
-          onTap: () {
-            // TODO: Navigate to melt screen
-          },
+            // Receive Button
+            SecondaryActionCard(
+              icon: Icons.arrow_downward_rounded,
+              title: 'Receive',
+              color: actionColors['receive']!,
+              onTap: () {
+                // TODO: Navigate to receive screen
+              },
+            ),
+
+            // Melt Button
+            SecondaryActionCard(
+              icon: Icons.currency_bitcoin,
+              title: 'Melt',
+              color: actionColors['melt']!,
+              onTap: () {
+                // TODO: Navigate to melt screen
+              },
+            ),
+          ],
         ),
       ],
     );

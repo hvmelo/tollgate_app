@@ -36,106 +36,96 @@ class ConnectedTollgateCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool hasActiveSession = remainingSeconds > 0;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final String ssidStr = ssid.replaceAll('"', '');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.colorScheme.primary.withAlpha(25),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'TollGate Network',
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                color: context.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tollgateInfo.humanReadablePrice(),
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurface.withAlpha(179),
-                          ),
-                        ),
-                      ],
-                    ),
+    return Card(
+      color: isDarkMode
+          ? context.colorScheme.primary.withAlpha(25)
+          : const Color(0xFFFAFAFA),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow('Network', ssidStr),
+            _buildInfoRow(
+              'Pricing',
+              tollgateInfo.humanReadablePrice(),
+            ),
+            if (tollgateInfo.mintUrl.isNotEmpty)
+              _buildInfoRow('Mint URL', tollgateInfo.mintUrl),
+            if (hasActiveSession) ...[
+              const SizedBox(height: 8),
+              _buildInfoRow('Remaining Time', _formatRemainingTime()),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: remainingSeconds / 300,
+                  minHeight: 8,
+                  backgroundColor: context.colorScheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.colorScheme.primary,
                   ),
-                ],
-              ),
-              if (hasActiveSession) ...[
-                const SizedBox(height: 12),
-                const Divider(height: 1, thickness: 1),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Remaining Time',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      _formatRemainingTime(),
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: remainingSeconds / 300,
-                    minHeight: 8,
-                    backgroundColor:
-                        context.colorScheme.surfaceContainerHighest,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      context.colorScheme.primary,
-                    ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    variant: AppButtonVariant.secondary,
+                    label: 'Top Up',
+                    onPressed: () {
+                      context.push('${Routes.home}payment', extra: {
+                        'ssid': ssid,
+                        'tollgateInfo': tollgateInfo,
+                      });
+                    },
                   ),
                 ),
               ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: AppButton(
-                variant: AppButtonVariant.secondary,
-                label: 'Top Up',
-                onPressed: () {
-                  context.push('${Routes.home}payment', extra: {
-                    'ssid': ssid,
-                    'tollgateInfo': tollgateInfo,
-                  });
-                },
-              ),
             ),
           ],
         ),
-      ],
+      ),
     );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatStepSize(int seconds) {
+    if (seconds >= 3600) {
+      final hours = seconds / 3600;
+      return '${hours.toStringAsFixed(1)} hour${hours != 1 ? 's' : ''}';
+    }
+    if (seconds >= 60) {
+      final minutes = seconds ~/ 60;
+      return '$minutes minute${minutes != 1 ? 's' : ''}';
+    }
+    return '$seconds second${seconds != 1 ? 's' : ''}';
   }
 }

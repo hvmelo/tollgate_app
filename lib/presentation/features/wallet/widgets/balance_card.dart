@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 import 'package:tollgate_app/presentation/features/wallet/providers/wallet_balance_stream_provider.dart';
 
 import '../../../common/widgets/cards/error_card.dart';
 import '../../../common/widgets/cards/loading_card.dart';
+import '../providers/local_ecash_providers.dart';
 
 class BalanceCard extends ConsumerWidget {
   const BalanceCard({super.key});
@@ -11,11 +13,13 @@ class BalanceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceAsync = ref.watch(walletBalanceStreamProvider);
+    final ecashBalance = ref.watch(ecashLocalTokenStreamProvider);
 
     return switch (balanceAsync) {
       AsyncData(:final value) => _buildWidget(
           context,
-          balance: value,
+          mintsBalance: value,
+          ecashBalance: ecashBalance.value?.amount ?? BigInt.zero,
         ),
       AsyncError(:final error) => ErrorCard(
           message: 'Error loading balance',
@@ -26,7 +30,8 @@ class BalanceCard extends ConsumerWidget {
     };
   }
 
-  Widget _buildWidget(BuildContext context, {required BigInt balance}) {
+  Widget _buildWidget(BuildContext context,
+      {required BigInt mintsBalance, required BigInt ecashBalance}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final fadedTextColor =
         Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
@@ -63,36 +68,59 @@ class BalanceCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Current Balance',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: fadedTextColor,
+            'Balance',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: context.colorScheme.onSurface,
                 ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                balance.toString(),
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  'sats',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: fadedTextColor,
-                      ),
-                ),
-              ),
+              _buildBalanceItem(
+                  context, 'In Mints', mintsBalance, fadedTextColor, textColor),
+              _buildBalanceItem(context, 'Local eCash', ecashBalance,
+                  fadedTextColor, textColor),
             ],
-          )
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBalanceItem(BuildContext context, String label, BigInt balance,
+      Color fadedTextColor, Color textColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: fadedTextColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              balance.toString(),
+              style: context.textTheme.titleLarge?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'sats',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: fadedTextColor,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

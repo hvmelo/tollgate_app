@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 abstract final class AppColors {
   // Base colors
   static const black = Color(0xFF101010);
-  static const white = Color(0xFFFFF7FA);
+  static const white = Color(0xFFF2F4F7);
   static const grey100 = Color(0xFFF2F2F2);
   static const grey300 = Color(0xFFE0E0E0);
   static const grey500 = Color(0xFFA4A4A4);
@@ -88,8 +88,8 @@ abstract final class AppColors {
   static final actionColors = {
     'send': orange,
     'receive': green,
-    'scan': blue,
-    'mint': purple,
-    'melt': blue,
+    'reserve': blue,
+    'melt': purple,
+    'cache': blue,
   };
 }

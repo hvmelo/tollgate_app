@@ -49,7 +49,7 @@ class TollGateInfo {
     final metric = findTagValue('metric', defaultValue: 'time');
     final stepSizeStr = findTagValue('step_size', defaultValue: '60');
     final pricePerStepStr = findTagValue('price_per_step', defaultValue: '10');
-    final mintUrl = findTagValue('mint_url', defaultValue: '');
+    final mintUrl = findTagValue('mint', defaultValue: '');
     final tips = findTagValue('tip',
         defaultValue: 'Pay for WiFi with Bitcoin Lightning ⚡');
 

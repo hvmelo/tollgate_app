@@ -5,17 +5,17 @@ import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart
 import 'package:tollgate_app/presentation/router/routes.dart';
 
 import '../widgets/balance_card.dart';
-import 'controllers/send_screen_notifier.dart';
-import 'widgets/widgets.dart'; // Import the barrel file
+import 'controllers/reserve_screen_notifier.dart';
+import 'widgets/widgets.dart';
 
-class SendScreen extends ConsumerWidget {
-  const SendScreen({super.key});
+class ReserveScreen extends ConsumerWidget {
+  const ReserveScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sendScreenStateAsync = ref.watch(sendScreenNotifierProvider);
+    final reserveScreenStateAsync = ref.watch(reserveScreenNotifierProvider);
 
-    void handleCloseToken() {
+    void handleReserveComplete() {
       if (context.canPop()) {
         context.pop();
       } else {
@@ -29,7 +29,7 @@ class SendScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Send',
+          'Reserve',
           style: TextStyle(
             color: context.colorScheme.onSurface,
             fontWeight: FontWeight.bold,
@@ -46,12 +46,12 @@ class SendScreen extends ConsumerWidget {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: switch (sendScreenStateAsync) {
+            child: switch (reserveScreenStateAsync) {
               AsyncData(:final value) => _buildUI(
-                  sendScreenNotifier:
-                      ref.read(sendScreenNotifierProvider.notifier),
+                  reserveScreenNotifier:
+                      ref.read(reserveScreenNotifierProvider.notifier),
                   value: value,
-                  handleCloseToken: handleCloseToken,
+                  handleReserveComplete: handleReserveComplete,
                 ),
               AsyncError(:final error) => ErrorWidget(error),
               _ => SizedBox(
@@ -71,29 +71,26 @@ class SendScreen extends ConsumerWidget {
   }
 
   Widget _buildUI({
-    required SendScreenNotifier sendScreenNotifier,
-    required SendScreenState value,
-    required void Function() handleCloseToken,
+    required ReserveScreenNotifier reserveScreenNotifier,
+    required ReserveScreenState value,
+    required VoidCallback handleReserveComplete,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Display the current balance card
         const BalanceCard(),
         const SizedBox(height: 24),
-        // Display the correct widget based on the state
         switch (value) {
-          SendScreenEditingState() => SendAmountInputForm(
-              sendScreenNotifier: sendScreenNotifier,
+          ReserveScreenEditingState() => ReserveAmountInputForm(
               state: value,
+              reserveScreenNotifier: reserveScreenNotifier,
             ),
-          SendScreenConfirmingState() => SendConfirmationDisplay(
+          ReserveScreenConfirmingState() => ReserveConfirmationDisplay(
               state: value,
-              sendScreenNotifier: sendScreenNotifier, // Pass the notifier
+              reserveScreenNotifier: reserveScreenNotifier,
             ),
-          SendScreenTokenState() => TokenDisplay(
-              token: value.token,
-              onClose: handleCloseToken,
+          ReserveScreenCompleteState(:final token) => ReserveCompleteDisplay(
+              token: token,
+              onClose: handleReserveComplete,
             ),
         },
       ],

@@ -11,7 +11,7 @@ import '../../../../common/widgets/buttons/app_button.dart';
 import '../../../../common/widgets/qr_code/qr_code_card.dart';
 import '../../../../common/widgets/snackbar/app_snackbar.dart';
 import '../../providers/current_mint_provider.dart';
-import '../../providers/mint_transactions_provider.dart';
+import '../../providers/mint_transactions_providers.dart';
 
 class InvoiceDisplay extends ConsumerWidget {
   final Mint mint;
@@ -83,34 +83,54 @@ class InvoiceDisplay extends ConsumerWidget {
     BuildContext context, {
     required MintQuote mintQuote,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Simple amount display
-        Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 24),
-          child: Row(
-            children: [
-              Icon(
-                Icons.bolt,
-                color: AppColors.actionColors['receive'],
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${amount.value} sats',
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.actionColors['receive'],
-                ),
-              ),
-            ],
-          ),
-        ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-        // QR Code card
-        Column(
+    return Card(
+      color: isDarkMode
+          ? context.colorScheme.primary.withAlpha(25)
+          : const Color(0xFFFAFAFA),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.bolt,
+                  color: context.colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Invoice Details',
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            // Amount display
+            Row(
+              children: [
+                Icon(
+                  Icons.bolt,
+                  color: AppColors.actionColors['receive'],
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${amount.value} sats',
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.actionColors['receive'],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // QR Code card
             QrCodeCard(
               data: mintQuote.request,
               size: MediaQuery.of(context).size.width - 82,
@@ -119,9 +139,7 @@ class InvoiceDisplay extends ConsumerWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: null,
             ),
-
             const SizedBox(height: 24),
-
             // Action buttons
             Row(
               children: [
@@ -155,7 +173,7 @@ class InvoiceDisplay extends ConsumerWidget {
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 

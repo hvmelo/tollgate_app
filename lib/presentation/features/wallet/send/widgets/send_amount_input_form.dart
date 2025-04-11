@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../../core/result/result.dart';
 import '../../../../../domain/wallet/value_objects/send_amount.dart';
 import '../controllers/send_screen_notifier.dart';
 
-class SendAmountInputForm extends StatelessWidget {
+class SendAmountInputForm extends HookWidget {
   final SendScreenNotifier sendScreenNotifier;
   final SendScreenEditingState state;
 
@@ -18,12 +19,13 @@ class SendAmountInputForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We create a new FocusNode to manage the input field focus
-    final amountFocusNode = FocusNode();
+    final amountFocusNode = useFocusNode();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      elevation: 0,
-      color: context.colorScheme.surface,
+      color: isDarkMode
+          ? context.colorScheme.primary.withAlpha(25)
+          : context.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
@@ -46,18 +48,19 @@ class SendAmountInputForm extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
-              // Custom amount input field
+              const Divider(),
               Container(
                 decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceContainerHighest,
+                  color: isDarkMode
+                      ? context.colorScheme.surface
+                      : context.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       margin: const EdgeInsets.only(top: 5),
@@ -101,8 +104,13 @@ class SendAmountInputForm extends StatelessWidget {
                         },
                         style: context.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : null,
                         ),
                         decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDarkMode
+                              ? context.colorScheme.surface
+                              : context.colorScheme.surfaceContainerHighest,
                           border: InputBorder.none,
                           hintText: '0',
                           hintStyle: context.textTheme.headlineSmall?.copyWith(
@@ -119,9 +127,7 @@ class SendAmountInputForm extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 height: 56,

@@ -34,6 +34,8 @@ class WalletCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: () => context.push(Routes.wallet),
       borderRadius: BorderRadius.circular(16),
@@ -48,7 +50,9 @@ class WalletCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withAlpha(25),
+              color: isDarkMode
+                  ? colorScheme.primary.withAlpha(25)
+                  : Color(0xFFFAFAFA),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(

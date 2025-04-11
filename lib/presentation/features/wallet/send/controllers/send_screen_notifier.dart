@@ -9,7 +9,7 @@ import '../../../../../core/result/result.dart';
 import '../../../../../core/result/unit.dart';
 import '../../../../../domain/wallet/errors/wallet_errors.dart';
 import '../../../../../domain/wallet/value_objects/send_amount.dart';
-import '../../providers/mint_transactions_provider.dart';
+import '../../providers/mint_transactions_providers.dart';
 
 part 'send_screen_notifier.freezed.dart';
 part 'send_screen_notifier.g.dart';

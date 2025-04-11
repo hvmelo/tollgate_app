@@ -1,33 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tollgate_app/core/result/result.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 
-import '../../../../../domain/wallet/value_objects/mint_amount.dart';
-import '../controllers/mint_screen_notifier.dart';
+import '../../../../../core/result/result.dart';
+import '../controllers/reserve_screen_notifier.dart';
 
-class AmountInputForm extends HookWidget {
-  final MintScreenNotifier mintScreenNotifier;
-  final MintScreenEditingState state;
+class ReserveAmountInputForm extends HookConsumerWidget {
+  final ReserveScreenEditingState state;
+  final ReserveScreenNotifier reserveScreenNotifier;
 
-  const AmountInputForm({
+  const ReserveAmountInputForm({
     super.key,
-    required this.mintScreenNotifier,
     required this.state,
+    required this.reserveScreenNotifier,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final amountFocusNode = useFocusNode();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final showError = state.showErrorMessages;
 
     return Card(
+      elevation: 0,
       color: isDarkMode
           ? context.colorScheme.primary.withAlpha(25)
-          : const Color(0xFFFAFAFA),
+          : context.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: context.colorScheme.outline.withAlpha(178),
+          width: 1.0,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           autovalidateMode: state.showErrorMessages
               ? AutovalidateMode.always
@@ -35,18 +44,18 @@ class AmountInputForm extends HookWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Text(
-                    context.l10n.mintScreenAmountInSatsLabel,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              Text(
+                'Reserve eCash',
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const Divider(),
-              // Custom amount input field
+              const SizedBox(height: 8),
+              Text(
+                'Specify how much eCash you want to generate and store offline for TollGate',
+                style: context.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 32),
               Container(
                 decoration: BoxDecoration(
                   color: isDarkMode
@@ -64,12 +73,12 @@ class AmountInputForm extends HookWidget {
                       margin: const EdgeInsets.only(top: 5),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.green.withAlpha(30),
+                        color: Colors.purple.withAlpha(30),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.bolt,
-                        color: Colors.green,
+                        Icons.offline_bolt_rounded,
+                        color: Colors.purple,
                         size: 24,
                       ),
                     ),
@@ -81,24 +90,16 @@ class AmountInputForm extends HookWidget {
                           FilteringTextInputFormatter.digitsOnly
                         ],
                         focusNode: amountFocusNode,
-                        initialValue: state.amount.toString(),
+                        initialValue: state.amount.value.toString() == '0'
+                            ? ''
+                            : state.amount.value.toString(),
                         onChanged: (value) {
-                          mintScreenNotifier.amountChanged(value);
+                          reserveScreenNotifier.updateAmount(value);
                         },
                         validator: (_) {
-                          final validationResult =
-                              mintScreenNotifier.validateAmount();
-
-                          return switch (validationResult) {
-                            Ok() => null,
-                            Failure(failure: final error) => switch (error) {
-                                MintAmountTooLarge(:final maxAmount) =>
-                                  context.l10n.mintScreenAmountTooLarge(
-                                      maxAmount.toString()),
-                                MintAmountNegativeOrZero() =>
-                                  context.l10n.mintScreenAmountNegativeOrZero,
-                              },
-                          };
+                          return showError && state.amount.value <= BigInt.zero
+                              ? 'Please enter a valid amount'
+                              : null;
                         },
                         style: context.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -125,28 +126,49 @@ class AmountInputForm extends HookWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              if (state.error != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  state.error.toString(),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    mintScreenNotifier.generateInvoice();
-                  },
+                  onPressed: state.isPreparingSend
+                      ? null
+                      : () {
+                          reserveScreenNotifier.prepareReserve();
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.primary,
-                    foregroundColor: context.colorScheme.onPrimary,
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
-                    context.l10n.mintScreenCreateInvoice,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: state.isPreparingSend
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Reserve',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],

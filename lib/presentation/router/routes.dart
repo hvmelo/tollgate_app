@@ -8,4 +8,5 @@ abstract final class Routes {
   static const payment = '/payment';
   static const mint = '/wallet/mint';
   static const send = '/wallet/send';
+  static const reserve = '/wallet/reserve';
 }

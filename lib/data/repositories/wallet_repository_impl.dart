@@ -142,11 +142,17 @@ class WalletRepositoryImpl extends WalletRepository {
 
       if (mintWallet == null) {
         yield Result.failure(MintQuoteStreamFailure.mintNotFound(mint.url));
+        return;
       }
 
-      yield* mintWallet!
+      yield* mintWallet
           .mint(amount: amount.value, description: description)
-          .map((quote) => Result.ok(quote));
+          .map<Result<MintQuote, MintQuoteStreamFailure>>(
+              (quote) => Result.ok(quote))
+          .handleError((error, stackTrace) {
+        // Yield a failure result
+        return Result.failure(MintQuoteStreamFailure.unexpected(error));
+      });
     } catch (e) {
       yield Result.failure(MintQuoteStreamFailure.unexpected(e));
     }

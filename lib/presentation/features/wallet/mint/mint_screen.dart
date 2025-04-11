@@ -13,6 +13,7 @@ class MintScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mintScreenStateAsync = ref.watch(mintScreenNotifierProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     void handleCloseInvoice() {
       ref.read(mintScreenNotifierProvider.notifier).reset();
@@ -25,7 +26,7 @@ class MintScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceContainerHighest,
+      backgroundColor: isDarkMode ? context.colorScheme.surface : Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -45,8 +46,9 @@ class MintScreen extends ConsumerWidget {
       extendBodyBehindAppBar: false,
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: switch (mintScreenStateAsync) {
               AsyncData(:final value) => _buildUI(
                   mintScreenNotifier:
@@ -55,7 +57,15 @@ class MintScreen extends ConsumerWidget {
                   handleCloseInvoice: handleCloseInvoice,
                 ),
               AsyncError(:final error) => ErrorWidget(error),
-              _ => const Center(child: CircularProgressIndicator()),
+              _ => SizedBox(
+                  height: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      AppBar().preferredSize.height -
+                      32, // Account for padding
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
             },
           ),
         ),
@@ -71,6 +81,7 @@ class MintScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 24),
         // Display the mint card
         const CurrentMintCard(),
         const SizedBox(height: 24),

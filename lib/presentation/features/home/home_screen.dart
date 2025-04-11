@@ -109,8 +109,10 @@ class HomeScreen extends HookConsumerWidget {
         ConnectionStatusCard(
           connectionInfo: currentConnectionState.connectionInfo,
           hasInternet: hasInternet,
+          isTollGate:
+              currentConnectionState.connectionInfo?.isTollGate ?? false,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         if (currentConnectionState.connectionInfo != null)
           if (currentConnectionState.connectionInfo!.isTollGate)
             _buildTollgateCard(

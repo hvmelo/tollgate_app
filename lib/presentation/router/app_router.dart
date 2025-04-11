@@ -5,6 +5,7 @@ import 'package:tollgate_app/presentation/features/tollgate/payment/payment_scre
 import 'package:tollgate_app/presentation/features/settings/settings_screen.dart';
 
 import '../features/wallet/send/send_screen.dart';
+import '../features/wallet/reserve/reserve_screen.dart';
 import '../features/wifi/connection_details/connection_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/wifi/network_scan/scan_screen.dart';
@@ -123,6 +124,15 @@ GoRouter router() => GoRouter(
                       path: 'send',
                       pageBuilder: (context, state) => CustomTransitionPage(
                         child: const SendScreen(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) =>
+                                _buildSlideLeftTransition(animation, child),
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'reserve',
+                      pageBuilder: (context, state) => CustomTransitionPage(
+                        child: const ReserveScreen(),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) =>
                                 _buildSlideLeftTransition(animation, child),

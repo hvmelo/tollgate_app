@@ -3,16 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:tollgate_app/presentation/common/extensions/build_context_x.dart';
 import 'package:tollgate_app/presentation/common/widgets/buttons/app_button.dart';
 
-import '../controllers/send_screen_notifier.dart';
+import '../controllers/reserve_screen_notifier.dart';
 
-class SendConfirmationDisplay extends StatelessWidget {
-  final SendScreenConfirmingState state;
-  final SendScreenNotifier sendScreenNotifier;
+class ReserveConfirmationDisplay extends StatelessWidget {
+  final ReserveScreenConfirmingState state;
+  final ReserveScreenNotifier reserveScreenNotifier;
 
-  const SendConfirmationDisplay({
+  const ReserveConfirmationDisplay({
     super.key,
     required this.state,
-    required this.sendScreenNotifier,
+    required this.reserveScreenNotifier,
   });
 
   @override
@@ -35,7 +35,7 @@ class SendConfirmationDisplay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Confirm Send',
+              'Confirm Reserve',
               style: context.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -55,10 +55,10 @@ class SendConfirmationDisplay extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             AppButton(
-              label: 'Generate Token',
+              label: 'Reserve Token',
               variant: AppButtonVariant.secondary,
               onPressed: () {
-                sendScreenNotifier.generateToken();
+                reserveScreenNotifier.generateAndStoreToken();
               },
               isLoading: state.isGeneratingToken,
             ),

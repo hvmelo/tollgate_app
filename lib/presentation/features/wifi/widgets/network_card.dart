@@ -23,6 +23,8 @@ class NetworkCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     // Convert signal strength to percentage (typical range is -100 to 0)
     final signalPercent =
         ((network.signalStrength + 100) / 100).clamp(0.0, 1.0);
@@ -34,7 +36,9 @@ class NetworkCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: colorScheme.primary.withAlpha(25),
+          color: isDarkMode
+              ? colorScheme.primary.withAlpha(25)
+              : Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
